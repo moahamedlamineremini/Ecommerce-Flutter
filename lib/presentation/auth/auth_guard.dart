@@ -13,7 +13,7 @@ GoRouter createRouter() {
     ],
     redirect: (context, state) {
       final user = FirebaseAuth.instance.currentUser;
-      final loggingIn = state.subloc == '/login';
+      final loggingIn = state.name == 'login';
       if (user == null && !loggingIn) return '/login';
       if (user != null && loggingIn) return '/catalog';
       return null;
