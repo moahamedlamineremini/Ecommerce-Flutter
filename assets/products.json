@@ -3,10 +3,10 @@
     "id": 1,
     "title": "T-shirt basique",
     "price": 19.99,
-    "thumbnail": "https://picsum.photos/seed/tshirt/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/tshirt1/400/400",
-      "https://picsum.photos/seed/tshirt2/400/400"
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "T-shirt en coton bio, confortable et léger.",
     "category": "Vêtements"
@@ -15,10 +15,10 @@
     "id": 2,
     "title": "Jean slim",
     "price": 49.99,
-    "thumbnail": "https://picsum.photos/seed/jean/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/jean1/400/400",
-      "https://picsum.photos/seed/jean2/400/400"
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Jean slim bleu foncé, coupe moderne.",
     "category": "Vêtements"
@@ -27,10 +27,10 @@
     "id": 3,
     "title": "Basket running",
     "price": 89.90,
-    "thumbnail": "https://picsum.photos/seed/shoes/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/shoes1/400/400",
-      "https://picsum.photos/seed/shoes2/400/400"
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Chaussures de sport légères et respirantes.",
     "category": "Chaussures"
@@ -39,10 +39,10 @@
     "id": 4,
     "title": "Montre connectée",
     "price": 149.99,
-    "thumbnail": "https://picsum.photos/seed/watch/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/watch1/400/400",
-      "https://picsum.photos/seed/watch2/400/400"
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Montre connectée avec suivi de santé et notifications.",
     "category": "Accessoires"
@@ -51,10 +51,10 @@
     "id": 5,
     "title": "Sac à dos",
     "price": 59.00,
-    "thumbnail": "https://picsum.photos/seed/bag/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/bag1/400/400",
-      "https://picsum.photos/seed/bag2/400/400"
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Sac à dos robuste, idéal pour le quotidien ou les voyages.",
     "category": "Accessoires"
@@ -63,10 +63,10 @@
     "id": 6,
     "title": "Casque Bluetooth",
     "price": 79.99,
-    "thumbnail": "https://picsum.photos/seed/headphones/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/headphones1/400/400",
-      "https://picsum.photos/seed/headphones2/400/400"
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Casque sans fil avec réduction de bruit active.",
     "category": "Électronique"
@@ -75,10 +75,10 @@
     "id": 7,
     "title": "Clavier mécanique",
     "price": 109.00,
-    "thumbnail": "https://picsum.photos/seed/keyboard/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/keyboard1/400/400",
-      "https://picsum.photos/seed/keyboard2/400/400"
+      "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1541140532154-b024d705b90a?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Clavier mécanique RGB avec switches rapides.",
     "category": "Électronique"
@@ -87,10 +87,10 @@
     "id": 8,
     "title": "Lampe de bureau",
     "price": 29.50,
-    "thumbnail": "https://picsum.photos/seed/lamp/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/lamp1/400/400",
-      "https://picsum.photos/seed/lamp2/400/400"
+      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Lampe LED orientable avec luminosité réglable.",
     "category": "Maison"
@@ -99,10 +99,10 @@
     "id": 9,
     "title": "Mug céramique",
     "price": 12.00,
-    "thumbnail": "https://picsum.photos/seed/mug/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/mug1/400/400",
-      "https://picsum.photos/seed/mug2/400/400"
+      "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Mug en céramique 300ml, passe au lave-vaisselle.",
     "category": "Maison"
@@ -111,10 +111,10 @@
     "id": 10,
     "title": "Livre de recettes",
     "price": 24.90,
-    "thumbnail": "https://picsum.photos/seed/book/200/200",
+    "thumbnail": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=200&h=200&fit=crop",
     "images": [
-      "https://picsum.photos/seed/book1/400/400",
-      "https://picsum.photos/seed/book2/400/400"
+      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=400&fit=crop&crop=closeup"
     ],
     "description": "Livre de recettes illustrées pour la cuisine du quotidien.",
     "category": "Livres"

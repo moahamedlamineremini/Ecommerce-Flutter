@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       // Pour tester la page produit avec un ID fixe
-      home: const ProductPage(productId: 1),
+      home: const ProductPage(productId: 7),
     );
   }
 }

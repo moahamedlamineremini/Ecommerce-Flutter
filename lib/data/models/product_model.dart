@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../../domain/entities/product.dart';
 
 class ProductModel {

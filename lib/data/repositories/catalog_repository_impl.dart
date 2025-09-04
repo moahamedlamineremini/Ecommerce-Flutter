@@ -1,6 +1,5 @@
 import 'package:ecommerce_app/domain/entities/product.dart';
 import 'package:ecommerce_app/domain/repositories/catalog_repository.dart';
-import '../models/product_model.dart';
 import '../sources/local_json_source.dart';
 
 class CatalogRepositoryImpl implements CatalogRepository {
