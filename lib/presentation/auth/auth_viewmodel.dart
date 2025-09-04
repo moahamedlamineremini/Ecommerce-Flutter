@@ -1,25 +1,90 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
+/// Provider accessible partout dans l'app.
+/// Contient l'état de l'utilisateur Firebase courant (User?).
 final authViewModelProvider =
 StateNotifierProvider<AuthViewModel, User?>((ref) => AuthViewModel());
 
+/// ViewModel pour gérer l'authentification (email/mdp + Google).
 class AuthViewModel extends StateNotifier<User?> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
   AuthViewModel() : super(FirebaseAuth.instance.currentUser) {
-    FirebaseAuth.instance.authStateChanges().listen((user) => state = user);
+    // Écoute en temps réel les changements d'authentification
+    _auth.authStateChanges().listen((user) => state = user);
   }
 
-  Future<void> signIn(String email, String password) async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email, password: password);
+  /// Connexion avec email et mot de passe
+  Future<String?> signIn(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
+      return null; // ✅ succès
+    } on FirebaseAuthException catch (e) {
+      return _mapErrorToMessage(e);
+    } catch (_) {
+      return "An unexpected error occurred. Please try again.";
+    }
   }
 
-  Future<void> register(String email, String password) async {
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: email, password: password);
+  /// Inscription avec email et mot de passe
+  Future<String?> register(String email, String password) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _mapErrorToMessage(e);
+    } catch (_) {
+      return "An unexpected error occurred. Please try again.";
+    }
   }
 
+  /// Déconnexion (Firebase + Google si nécessaire)
   Future<void> signOut() async {
-    await FirebaseAuth.instance.signOut();
+    await _auth.signOut();
+    await _googleSignIn.signOut();
+  }
+
+  /// Connexion avec Google
+  Future<String?> signInWithGoogle() async {
+    try {
+      final googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return "Google sign-in was cancelled.";
+
+      final googleAuth = await googleUser.authentication;
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await _auth.signInWithCredential(credential);
+      return null;
+    } on FirebaseAuthException catch (e) {
+      return _mapErrorToMessage(e);
+    } catch (_) {
+      return "Google sign-in failed. Please try again.";
+    }
+  }
+
+  String _mapErrorToMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-email':
+        return "Invalid email format.";
+      case 'user-disabled':
+        return "This account has been disabled.";
+      case 'user-not-found':
+        return "No account found for this email.";
+      case 'wrong-password':
+        return "Incorrect password. Please try again.";
+      case 'email-already-in-use':
+        return "This email is already registered.";
+      case 'weak-password':
+        return "Password is too weak. Use at least 6 characters.";
+      default:
+        return "Authentication failed. Please try again.";
+    }
   }
 }
