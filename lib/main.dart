@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 
-void main() {
+import 'data/repositories/catalog_repository_impl.dart';
+import 'data/sources/local_json_source.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final repo = CatalogRepositoryImpl(localJsonSource: LocalJsonSource());
+
+  final products = await repo.fetchProducts();
+  print("Nb produits: ${products.length}");
+  print("Premier produit: ${products.first.title}");
+
   runApp(const MyApp());
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
