@@ -21,7 +21,7 @@ class AuthViewModel extends StateNotifier<User?> {
   Future<String?> signIn(String email, String password) async {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return null; // ✅ succès
+      return null; //  succès
     } on FirebaseAuthException catch (e) {
       return _mapErrorToMessage(e);
     } catch (_) {
@@ -48,11 +48,12 @@ class AuthViewModel extends StateNotifier<User?> {
     await _googleSignIn.signOut();
   }
 
-  /// Connexion avec Google
   Future<String?> signInWithGoogle() async {
     try {
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return "Google sign-in was cancelled.";
+      final googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        return "Google sign-in aborted";
+      }
 
       final googleAuth = await googleUser.authentication;
       final credential = GoogleAuthProvider.credential(
@@ -60,14 +61,13 @@ class AuthViewModel extends StateNotifier<User?> {
         idToken: googleAuth.idToken,
       );
 
-      await _auth.signInWithCredential(credential);
-      return null;
-    } on FirebaseAuthException catch (e) {
-      return _mapErrorToMessage(e);
-    } catch (_) {
-      return "Google sign-in failed. Please try again.";
+      await FirebaseAuth.instance.signInWithCredential(credential);
+      return null; // ✅ pas d’erreur
+    } catch (e) {
+      return e.toString();
     }
   }
+
 
   String _mapErrorToMessage(FirebaseAuthException e) {
     switch (e.code) {

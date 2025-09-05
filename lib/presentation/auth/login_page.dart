@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'auth_viewmodel.dart';
 import '../catalog/catalog_page.dart';
 
@@ -13,6 +14,7 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
+  final confirmPassCtrl = TextEditingController();
   bool isRegister = false;
   bool isLoading = false;
 
@@ -50,19 +52,45 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               obscureText: true,
             ),
             const SizedBox(height: 16),
-
+            // Confirm Password (uniquement si Register)
+            if (isRegister)
+              TextField(
+                controller: confirmPassCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Confirm Password',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+              ),
+            if (isRegister) const SizedBox(height: 16),
             // Login/Register button
             ElevatedButton(
               onPressed: isLoading
                   ? null
                   : () async {
+                // Vérification mot de passe en mode Register
+                if (isRegister &&
+                    passCtrl.text.trim() != confirmPassCtrl.text.trim()) {
+                  setState(() => isLoading = false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Passwords do not match"),
+                    ),
+                  );
+                  return; // on sort sans appeler Firebase
+                }
+
                 setState(() => isLoading = true);
                 final error = isRegister
                     ? await auth.register(
-                    emailCtrl.text.trim(), passCtrl.text.trim())
+                  emailCtrl.text.trim(),
+                  passCtrl.text.trim(),
+                )
                     : await auth.signIn(
-                    emailCtrl.text.trim(), passCtrl.text.trim());
-                setState(() => isLoading = false);
+                  emailCtrl.text.trim(),
+                  passCtrl.text.trim(),
+                );
+                setState(() => isLoading = false);;
 
                 if (error == null) {
 
@@ -75,7 +103,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                   );
                 } else {
-                  // ❌ Erreur
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(error)),
                   );
@@ -113,19 +140,31 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ElevatedButton.icon(
               onPressed: () async {
                 setState(() => isLoading = true);
-                final error = await auth.signInWithGoogle();
-                setState(() => isLoading = false);
+                String? error;
 
-                if (error == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Signed in with Google ✅")),
-                  );
-                } else {
+                try {
+                  error = await auth.signInWithGoogle();
+                } finally {
+                  setState(() => isLoading = false); // toujours exécuté
+                }
+
+    if (error == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Signed in with Google ✅")),
+    );
+    // au lieu de Navigator.pushReplacement
+    Future.delayed(Duration.zero, () {
+    context.go('/catalog');
+    });
+    }
+
+   else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(error)),
                   );
                 }
               },
+
               icon: Image.asset(
                 'assets/google_logo.webp',
                 height: 24,
