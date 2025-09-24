@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:ecommerce_app/data/models/product_model.dart';
+
+class CartItem {
+  final ProductModel product;
+  int quantity;
+  CartItem({required this.product, this.quantity = 1});
+}
+
+class CartViewModel {
+  static final CartViewModel _instance = CartViewModel._internal();
+  factory CartViewModel() => _instance;
+  CartViewModel._internal();
+
+  final ValueNotifier<List<CartItem>> cartItems = ValueNotifier([]);
+
+  void addToCart(ProductModel product) {
+    final items = cartItems.value;
+    final index = items.indexWhere((item) => item.product.id == product.id);
+    if (index >= 0) {
+      items[index].quantity++;
+    } else {
+      items.add(CartItem(product: product));
+    }
+    cartItems.value = List.from(items);
+  }
+
+  void removeFromCart(int productId) {
+    final items = cartItems.value;
+    items.removeWhere((item) => item.product.id == productId);
+    cartItems.value = List.from(items);
+  }
+}
+

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ecommerce_app/presentation/pages/home_page.dart';
+import 'package:ecommerce_app/presentation/pages/products_page.dart';
 import 'package:ecommerce_app/presentation/pages/product_page.dart';
+import 'package:ecommerce_app/presentation/pages/cart_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,8 +18,25 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // Pour tester la page produit avec un ID fixe
-      home: const ProductPage(productId: 7),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomePage(),
+        '/products': (context) => const ProductsPage(),
+        '/cart': (context) => const CartPage(),
+      },
+      // Pour la page produit, on utilise onGenerateRoute pour passer l'ID dynamiquement
+      onGenerateRoute: (settings) {
+        if (settings.name?.startsWith('/product/') ?? false) {
+          final idStr = settings.name!.split('/').last;
+          final id = int.tryParse(idStr);
+          if (id != null) {
+            return MaterialPageRoute(
+              builder: (_) => ProductPage(productId: id),
+            );
+          }
+        }
+        return null;
+      },
     );
   }
 }
