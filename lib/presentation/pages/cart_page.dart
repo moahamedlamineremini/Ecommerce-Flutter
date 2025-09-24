@@ -93,12 +93,20 @@ class CartPage extends StatelessWidget {
                       child: ElevatedButton(
                         child: const Text('Passer la commande'),
                         onPressed: () {
+                          viewModel.placeOrder();
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
                               title: const Text('Paiement Stripe'),
-                              content: const Text('Paiement réussi ! (test Stripe)'),
+                              content: const Text('Paiement réussi ! (test Stripe)\nVotre commande a été enregistrée.'),
                               actions: [
+                                TextButton(
+                                  child: const Text('Voir l\'historique'),
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    Navigator.pushReplacementNamed(context, '/order-history');
+                                  },
+                                ),
                                 TextButton(
                                   child: const Text('OK'),
                                   onPressed: () => Navigator.pop(context),

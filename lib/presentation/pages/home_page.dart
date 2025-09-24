@@ -42,6 +42,10 @@ class AppDrawer extends StatelessWidget {
             title: Text('Panier'),
             onTap: () => Navigator.pushReplacementNamed(context, '/cart'),
           ),
+          ListTile(
+            title: Text('Historique des commandes'),
+            onTap: () => Navigator.pushReplacementNamed(context, '/order-history'),
+          ),
         ],
       ),
     );

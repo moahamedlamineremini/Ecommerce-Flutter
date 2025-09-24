@@ -7,12 +7,20 @@ class CartItem {
   CartItem({required this.product, this.quantity = 1});
 }
 
+class Order {
+  final List<CartItem> items;
+  final double totalPrice;
+  final DateTime date;
+  Order({required this.items, required this.totalPrice, required this.date});
+}
+
 class CartViewModel {
   static final CartViewModel _instance = CartViewModel._internal();
   factory CartViewModel() => _instance;
   CartViewModel._internal();
 
   final ValueNotifier<List<CartItem>> cartItems = ValueNotifier([]);
+  final ValueNotifier<List<Order>> orderHistory = ValueNotifier([]);
 
   void addToCart(Product product, {int quantity = 1}) {
     final items = cartItems.value;
@@ -47,5 +55,14 @@ class CartViewModel {
       items[index].quantity--;
       cartItems.value = List.from(items);
     }
+  }
+
+  void placeOrder() {
+    final items = List<CartItem>.from(cartItems.value);
+    if (items.isEmpty) return;
+    double totalPrice = items.fold(0, (sum, item) => sum + item.quantity * item.product.price);
+    orderHistory.value = List.from(orderHistory.value)
+      ..add(Order(items: items, totalPrice: totalPrice, date: DateTime.now()));
+    cartItems.value = [];
   }
 }
