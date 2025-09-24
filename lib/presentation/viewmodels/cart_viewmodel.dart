@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ecommerce_app/data/models/product_model.dart';
+import 'package:ecommerce_app/domain/entities/product.dart';
 
 class CartItem {
-  final ProductModel product;
+  final Product product;
   int quantity;
   CartItem({required this.product, this.quantity = 1});
 }
@@ -14,7 +14,7 @@ class CartViewModel {
 
   final ValueNotifier<List<CartItem>> cartItems = ValueNotifier([]);
 
-  void addToCart(ProductModel product) {
+  void addToCart(Product product) {
     final items = cartItems.value;
     final index = items.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
@@ -31,4 +31,3 @@ class CartViewModel {
     cartItems.value = List.from(items);
   }
 }
-

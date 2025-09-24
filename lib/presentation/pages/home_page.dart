@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ecommerce_app/presentation/pages/widgets/cart_icon.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -6,7 +7,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Accueil')),
+      appBar: AppBar(title: const Text('Accueil'), actions: [const CartIcon()]),
       drawer: const AppDrawer(),
       body: Center(
         child: ElevatedButton(
@@ -46,4 +47,3 @@ class AppDrawer extends StatelessWidget {
     );
   }
 }
-

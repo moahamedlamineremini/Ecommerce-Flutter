@@ -5,6 +5,7 @@ import 'package:ecommerce_app/domain/repositories/catalog_repository.dart';
 import 'package:ecommerce_app/data/repositories/catalog_repository_impl.dart';
 import 'package:ecommerce_app/data/sources/local_json_source.dart';
 import 'package:ecommerce_app/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:ecommerce_app/presentation/pages/widgets/cart_icon.dart';
 
 class ProductPage extends StatefulWidget {
   final int productId;
@@ -53,6 +54,7 @@ class _ProductPageState extends State<ProductPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [const CartIcon()],
       ),
       body: FutureBuilder<Product?>(
         future: _productFuture,
