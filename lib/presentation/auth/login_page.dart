@@ -17,7 +17,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final confirmPassCtrl = TextEditingController();
   bool isRegister = false;
   bool isLoading = false;
-
+  // Ajoute ces variables dans _LoginPageState
+  bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
   @override
   Widget build(BuildContext context) {
     final auth = ref.read(authViewModelProvider.notifier);
@@ -43,26 +45,46 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             const SizedBox(height: 12),
 
             // Password
-            TextField(
-              controller: passCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-                border: OutlineInputBorder(),
-              ),
-              obscureText: true,
+
+
+// Modifie le TextField du mot de passe
+      TextField(
+        controller: passCtrl,
+        decoration: InputDecoration(
+          labelText: 'Password',
+          border: const OutlineInputBorder(),
+          suffixIcon: IconButton(
+            icon: Icon(
+              obscurePassword ? Icons.visibility_off : Icons.visibility,
             ),
-            const SizedBox(height: 16),
-            // Confirm Password (uniquement si Register)
-            if (isRegister)
-              TextField(
-                controller: confirmPassCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm Password',
-                  border: OutlineInputBorder(),
-                ),
-                obscureText: true,
-              ),
-            if (isRegister) const SizedBox(height: 16),
+            onPressed: () {
+              setState(() => obscurePassword = !obscurePassword);
+            },
+          ),
+        ),
+        obscureText: obscurePassword,
+      ),
+
+// Modifie le TextField de confirmation (si Register)
+        if (isRegister)
+    TextField(
+      controller: confirmPassCtrl,
+      decoration: InputDecoration(
+        labelText: 'Confirm Password',
+        border: const OutlineInputBorder(),
+        suffixIcon: IconButton(
+          icon: Icon(
+            obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+          ),
+          onPressed: () {
+            setState(() => obscureConfirmPassword = !obscureConfirmPassword);
+          },
+        ),
+      ),
+      obscureText: obscureConfirmPassword,
+    ),
+
+    if (isRegister) const SizedBox(height: 16),
             // Login/Register button
             ElevatedButton(
               onPressed: isLoading
