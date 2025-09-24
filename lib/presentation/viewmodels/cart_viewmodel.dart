@@ -14,13 +14,13 @@ class CartViewModel {
 
   final ValueNotifier<List<CartItem>> cartItems = ValueNotifier([]);
 
-  void addToCart(Product product) {
+  void addToCart(Product product, {int quantity = 1}) {
     final items = cartItems.value;
     final index = items.indexWhere((item) => item.product.id == product.id);
     if (index >= 0) {
-      items[index].quantity++;
+      items[index].quantity += quantity;
     } else {
-      items.add(CartItem(product: product));
+      items.add(CartItem(product: product, quantity: quantity));
     }
     cartItems.value = List.from(items);
   }

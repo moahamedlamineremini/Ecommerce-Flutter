@@ -26,6 +26,7 @@ class ProductPage extends StatefulWidget {
 
 class _ProductPageState extends State<ProductPage> {
   late Future<Product?> _productFuture;
+  int _quantity = 1;
 
   CatalogRepository _repoOrDefault() {
     return widget.repository ?? CatalogRepositoryImpl(localJsonSource: LocalJsonSource());
@@ -83,6 +84,25 @@ class _ProductPageState extends State<ProductPage> {
                 Text(product.description),
                 const SizedBox(height: 16),
                 Text('Prix: ${product.price} €', style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Text('Quantité :', style: TextStyle(fontWeight: FontWeight.bold)),
+                    IconButton(
+                      icon: const Icon(Icons.remove),
+                      onPressed: () {
+                        if (_quantity > 1) setState(() => _quantity--);
+                      },
+                    ),
+                    Text('$_quantity', style: const TextStyle(fontSize: 16)),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: () {
+                        setState(() => _quantity++);
+                      },
+                    ),
+                  ],
+                ),
                 const Spacer(),
                 SizedBox(
                   width: double.infinity,
@@ -90,14 +110,11 @@ class _ProductPageState extends State<ProductPage> {
                     icon: const Icon(Icons.add_shopping_cart),
                     label: const Text('Ajouter au panier'),
                     onPressed: () {
-                      // Utilisation du CartViewModel
                       try {
-                        // On suppose que ProductModel et Product sont compatibles
-                        // Sinon, il faut adapter la conversion
                         final cartViewModel = CartViewModel();
-                        cartViewModel.addToCart(product as dynamic); // cast si besoin
+                        cartViewModel.addToCart(product, quantity: _quantity);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Produit ajouté au panier')),
+                          SnackBar(content: Text('$_quantity produit(s) ajouté(s) au panier')),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(
