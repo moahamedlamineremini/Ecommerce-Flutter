@@ -30,4 +30,22 @@ class CartViewModel {
     items.removeWhere((item) => item.product.id == productId);
     cartItems.value = List.from(items);
   }
+
+  void incrementQuantity(int productId) {
+    final items = cartItems.value;
+    final index = items.indexWhere((item) => item.product.id == productId);
+    if (index >= 0) {
+      items[index].quantity++;
+      cartItems.value = List.from(items);
+    }
+  }
+
+  void decrementQuantity(int productId) {
+    final items = cartItems.value;
+    final index = items.indexWhere((item) => item.product.id == productId);
+    if (index >= 0 && items[index].quantity > 1) {
+      items[index].quantity--;
+      cartItems.value = List.from(items);
+    }
+  }
 }

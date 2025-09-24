@@ -21,6 +21,7 @@ class CartPage extends StatelessWidget {
         valueListenable: viewModel.cartItems,
         builder: (context, items, _) {
           int total = items.fold(0, (sum, item) => sum + item.quantity);
+          double totalPrice = items.fold(0, (sum, item) => sum + item.quantity * item.product.price);
           if (items.isEmpty) {
             return const Center(child: Text('Votre panier est vide'));
           }
@@ -46,13 +47,69 @@ class CartPage extends StatelessWidget {
                         item.product.images.isNotEmpty ? item.product.images.first : item.product.thumbnail,
                         width: 50, height: 50),
                       title: Text(item.product.title),
-                      subtitle: Text('Quantité: ${item.quantity}'),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () => viewModel.removeFromCart(item.product.id),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Quantité: ${item.quantity}'),
+                          Text('Prix: ${(item.product.price * item.quantity).toStringAsFixed(2)} €'),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: () => viewModel.decrementQuantity(item.product.id),
+                          ),
+                          Text('${item.quantity}'),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () => viewModel.incrementQuantity(item.product.id),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => viewModel.removeFromCart(item.product.id),
+                          ),
+                        ],
                       ),
                     );
                   },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Prix total :', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text('${totalPrice.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        child: const Text('Passer la commande'),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: const Text('Paiement Stripe'),
+                              content: const Text('Paiement réussi ! (test Stripe)'),
+                              actions: [
+                                TextButton(
+                                  child: const Text('OK'),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
