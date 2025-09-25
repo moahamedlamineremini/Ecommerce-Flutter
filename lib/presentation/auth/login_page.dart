@@ -115,15 +115,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 setState(() => isLoading = false);;
 
                 if (error == null) {
-
-
-                ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(isRegister
                           ? "Account created successfully!"
                           : "Login successful!"),
                     ),
                   );
+                  context.go('/'); // Redirection vers l'accueil après connexion
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(error)),
