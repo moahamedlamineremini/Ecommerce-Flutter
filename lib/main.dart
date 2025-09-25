@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:go_router/go_router.dart';
+import 'presentation/auth/login_page.dart';
+import 'presentation/catalog/catalog_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'presentation/auth/auth_guard.dart'; // redirect logic (étape 7)
 import 'package:ecommerce_app/presentation/pages/home_page.dart';
 import 'package:ecommerce_app/presentation/pages/products_page.dart';
 import 'package:ecommerce_app/presentation/pages/product_page.dart';
@@ -6,7 +13,12 @@ import 'package:ecommerce_app/presentation/pages/cart_page.dart';
 import 'package:ecommerce_app/presentation/pages/order_history_page.dart';
 
 void main() {
+   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
