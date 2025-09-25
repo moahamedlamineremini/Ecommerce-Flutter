@@ -175,7 +175,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
     // au lieu de Navigator.pushReplacement
     Future.delayed(Duration.zero, () {
-    context.go('/catalog');
+    context.go('/');
     });
     }
 
