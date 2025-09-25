@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:go_router/go_router.dart';
 
 class OrderHistoryPage extends StatelessWidget {
   const OrderHistoryPage({super.key});
@@ -12,7 +13,7 @@ class OrderHistoryPage extends StatelessWidget {
         title: const Text('Historique des commandes'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.go('/'),
         ),
       ),
       body: ValueListenableBuilder<List<Order>>(

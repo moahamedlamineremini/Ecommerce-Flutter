@@ -4,6 +4,7 @@ import 'package:ecommerce_app/presentation/viewmodels/cart_viewmodel.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../auth/auth_viewmodel.dart';
 import '../auth/login_page.dart';
+import 'package:go_router/go_router.dart';
 
 class CartPage extends ConsumerWidget {
   const CartPage({super.key});
@@ -17,7 +18,7 @@ class CartPage extends ConsumerWidget {
         title: const Text('Panier'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => context.go('/products'),
         ),
       ),
       drawer: const AppDrawer(),
@@ -115,8 +116,8 @@ class CartPage extends ConsumerWidget {
                                 TextButton(
                                   child: const Text('Voir l\'historique'),
                                   onPressed: () {
-                                    Navigator.pop(context);
-                                    Navigator.pushReplacementNamed(context, '/order-history');
+                                    Navigator.pop(context); // ferme le dialog
+                                    context.go('/order-history'); // navigation GoRouter
                                   },
                                 ),
                                 TextButton(
