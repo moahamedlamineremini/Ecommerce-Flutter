@@ -62,6 +62,22 @@ class AppDrawer extends ConsumerWidget {
             title: Text('Historique des commandes'),
             onTap: () => context.go('/order-history'),
           ),
+          if (user != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.logout),
+                label: const Text('Déconnexion'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  await ref.read(authViewModelProvider.notifier).signOut();
+                  context.go('/login');
+                },
+              ),
+            ),
         ],
       ),
     );
