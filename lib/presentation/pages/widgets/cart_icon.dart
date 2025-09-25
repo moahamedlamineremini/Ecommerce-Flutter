@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:go_router/go_router.dart';
 
 class CartIcon extends StatelessWidget {
   const CartIcon({super.key});
@@ -15,7 +16,7 @@ class CartIcon extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.shopping_cart),
-              onPressed: () => Navigator.pushNamed(context, '/cart'),
+              onPressed: () => context.go('/cart'),
             ),
             if (count > 0)
               Positioned(
@@ -48,4 +49,3 @@ class CartIcon extends StatelessWidget {
     );
   }
 }
-

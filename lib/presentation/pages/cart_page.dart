@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/presentation/pages/home_page.dart';
 import 'package:ecommerce_app/presentation/viewmodels/cart_viewmodel.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../auth/auth_viewmodel.dart';
+import '../auth/login_page.dart';
 
-class CartPage extends StatelessWidget {
+class CartPage extends ConsumerWidget {
   const CartPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final viewModel = CartViewModel();
+    final user = ref.watch(authViewModelProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Panier'),
@@ -93,6 +97,14 @@ class CartPage extends StatelessWidget {
                       child: ElevatedButton(
                         child: const Text('Passer la commande'),
                         onPressed: () {
+                          if (user == null) {
+                            // Redirige vers la page de connexion si non authentifié
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const LoginPage()),
+                            );
+                            return;
+                          }
                           viewModel.placeOrder();
                           showDialog(
                             context: context,

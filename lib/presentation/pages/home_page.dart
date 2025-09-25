@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/presentation/pages/widgets/cart_icon.dart';
+import 'package:go_router/go_router.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -13,7 +14,7 @@ class HomePage extends StatelessWidget {
         child: ElevatedButton(
           child: const Text('Voir tous les produits'),
           onPressed: () {
-            Navigator.pushNamed(context, '/products');
+            context.go('/products');
           },
         ),
       ),
@@ -32,19 +33,19 @@ class AppDrawer extends StatelessWidget {
           DrawerHeader(child: Text('Menu')),
           ListTile(
             title: Text('Accueil'),
-            onTap: () => Navigator.pushReplacementNamed(context, '/'),
+            onTap: () => context.go('/'),
           ),
           ListTile(
             title: Text('Produits'),
-            onTap: () => Navigator.pushReplacementNamed(context, '/products'),
+            onTap: () => context.go('/products'),
           ),
           ListTile(
             title: Text('Panier'),
-            onTap: () => Navigator.pushReplacementNamed(context, '/cart'),
+            onTap: () => context.go('/cart'),
           ),
           ListTile(
             title: Text('Historique des commandes'),
-            onTap: () => Navigator.pushReplacementNamed(context, '/order-history'),
+            onTap: () => context.go('/order-history'),
           ),
         ],
       ),
