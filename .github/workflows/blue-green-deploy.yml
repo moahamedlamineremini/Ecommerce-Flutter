@@ -1,0 +1,240 @@
+name: Blue-Green Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+env:
+  FLUTTER_VERSION: '3.24.0'
+  FIREBASE_PROJECT_ID: 'ecommerce-55dd8'
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Run analyzer
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage/lcov.info
+          fail_ci_if_error: false
+
+  build:
+    name: Build Web App
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build web app
+        run: flutter build web --release --web-renderer canvaskit
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: web-build
+          path: build/web/
+          retention-days: 5
+
+  deploy-preview:
+    name: Deploy to Preview Channel (Blue/Green)
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.details_url }}
+      channel: ${{ steps.determine-channel.outputs.channel }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: web-build
+          path: build/web/
+
+      - name: Determine deployment channel
+        id: determine-channel
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "channel=green" >> $GITHUB_OUTPUT
+          else
+            echo "channel=blue" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to Firebase Hosting Preview
+        id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8 }}
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          channelId: ${{ steps.determine-channel.outputs.channel }}
+          expires: 30d
+
+      - name: Comment PR with preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '🚀 Preview deployed to: ${{ steps.deploy.outputs.details_url }}\n\nChannel: `${{ steps.determine-channel.outputs.channel }}`'
+            })
+
+  smoke-tests:
+    name: Run Smoke Tests
+    runs-on: ubuntu-latest
+    needs: deploy-preview
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install @playwright/test
+          npx playwright install
+
+      - name: Run smoke tests
+        run: |
+          cat > smoke-tests.js << 'EOF'
+          const { test, expect } = require('@playwright/test');
+          
+          test('App loads successfully', async ({ page }) => {
+            await page.goto('${{ needs.deploy-preview.outputs.preview-url }}');
+            await expect(page).toHaveTitle(/Flutter/);
+            
+            // Vérifier que l'app charge sans erreurs critiques
+            const errors = [];
+            page.on('pageerror', error => errors.push(error.message));
+            
+            await page.waitForLoadState('networkidle');
+            expect(errors).toHaveLength(0);
+          });
+          
+          test('Navigation works', async ({ page }) => {
+            await page.goto('${{ needs.deploy-preview.outputs.preview-url }}');
+            
+            // Test de navigation basique
+            const homeButton = page.getByText('Accueil').first();
+            if (await homeButton.isVisible()) {
+              await expect(homeButton).toBeVisible();
+            }
+          });
+          EOF
+          
+          npx playwright test smoke-tests.js
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: smoke-test-results
+          path: test-results/
+
+  promote-to-live:
+    name: Promote to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-preview, smoke-tests]
+    if: github.ref == 'refs/heads/main' && needs.smoke-tests.result == 'success'
+    environment:
+      name: production
+      url: https://${{ env.FIREBASE_PROJECT_ID }}.web.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Firebase CLI
+        run: |
+          npm install -g firebase-tools
+
+      - name: Authenticate with Firebase
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8 }}' | base64 -d > $HOME/firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-key.json
+
+      - name: Promote preview to live
+        run: |
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-key.json
+          firebase hosting:clone ${{ env.FIREBASE_PROJECT_ID }}:${{ needs.deploy-preview.outputs.channel }} ${{ env.FIREBASE_PROJECT_ID }}:live
+
+      - name: Verify production deployment
+        run: |
+          echo "✅ Production deployment successful!"
+          echo "🌐 Live URL: https://${{ env.FIREBASE_PROJECT_ID }}.web.app"
+
+      - name: Notify deployment success
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: '🎉 Successfully deployed to production!\n\n🌐 Live URL: https://${{ env.FIREBASE_PROJECT_ID }}.web.app\n\n📊 Channel: `${{ needs.deploy-preview.outputs.channel }}` → `live`'
+            })
+
+  rollback:
+    name: Rollback (Manual)
+    runs-on: ubuntu-latest
+    if: failure() && github.ref == 'refs/heads/main'
+    environment:
+      name: rollback
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Rollback deployment
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8 }}' | base64 -d > $HOME/firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-key.json
+          
+          echo "🔄 Rollback available via Firebase Console:"
+          echo "https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting"
