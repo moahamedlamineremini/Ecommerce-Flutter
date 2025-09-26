@@ -78,7 +78,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ),
                     onPressed: () {
                       setState(
-                            () => obscureConfirmPassword = !obscureConfirmPassword,
+                        () => obscureConfirmPassword = !obscureConfirmPassword,
                       );
                     },
                   ),
@@ -92,49 +92,53 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               onPressed: isLoading
                   ? null
                   : () async {
-                // Stocker le context avant l'opération async
-                final scaffoldMessenger = ScaffoldMessenger.of(context);
-                final navigator = GoRouter.of(context);
+                      // Stocker le context avant l'opération async
+                      final scaffoldMessenger = ScaffoldMessenger.of(context);
+                      final navigator = GoRouter.of(context);
 
-                // Vérification mot de passe en mode Register
-                if (isRegister &&
-                    passCtrl.text.trim() != confirmPassCtrl.text.trim()) {
-                  setState(() => isLoading = false);
-                  scaffoldMessenger.showSnackBar(
-                    const SnackBar(
-                      content: Text("Passwords do not match"),
-                    ),
-                  );
-                  return; // on sort sans appeler Firebase
-                }
+                      // Vérification mot de passe en mode Register
+                      if (isRegister &&
+                          passCtrl.text.trim() != confirmPassCtrl.text.trim()) {
+                        setState(() => isLoading = false);
+                        scaffoldMessenger.showSnackBar(
+                          const SnackBar(
+                            content: Text("Passwords do not match"),
+                          ),
+                        );
+                        return; // on sort sans appeler Firebase
+                      }
 
-                setState(() => isLoading = true);
-                final error = isRegister
-                    ? await auth.register(
-                  emailCtrl.text.trim(),
-                  passCtrl.text.trim(),
-                )
-                    : await auth.signIn(
-                  emailCtrl.text.trim(),
-                  passCtrl.text.trim(),
-                );
-                setState(() => isLoading = false);
+                      setState(() => isLoading = true);
+                      final error = isRegister
+                          ? await auth.register(
+                              emailCtrl.text.trim(),
+                              passCtrl.text.trim(),
+                            )
+                          : await auth.signIn(
+                              emailCtrl.text.trim(),
+                              passCtrl.text.trim(),
+                            );
+                      setState(() => isLoading = false);
 
-                if (error == null) {
-                  scaffoldMessenger.showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        isRegister
-                            ? "Account created successfully!"
-                            : "Login successful!",
-                      ),
-                    ),
-                  );
-                  navigator.go('/'); // Redirection vers l'accueil après connexion
-                } else {
-                  scaffoldMessenger.showSnackBar(SnackBar(content: Text(error)));
-                }
-              },
+                      if (error == null) {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isRegister
+                                  ? "Account created successfully!"
+                                  : "Login successful!",
+                            ),
+                          ),
+                        );
+                        navigator.go(
+                          '/',
+                        ); // Redirection vers l'accueil après connexion
+                      } else {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(content: Text(error)),
+                        );
+                      }
+                    },
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
                   : Text(isRegister ? 'Create account' : 'Sign in'),
@@ -188,7 +192,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   // au lieu de Navigator.pushReplacement
                   navigator.go('/');
                 } else {
-                  scaffoldMessenger.showSnackBar(SnackBar(content: Text(error)));
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(content: Text(error)),
+                  );
                 }
               },
 
