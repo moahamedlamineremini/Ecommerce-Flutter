@@ -20,9 +20,11 @@ class CatalogRepositoryImpl implements CatalogRepository {
     // Filtrage par recherche
     if (query != null && query.isNotEmpty) {
       products = products
-          .where((p) =>
-      p.title.toLowerCase().contains(query.toLowerCase()) ||
-          p.description.toLowerCase().contains(query.toLowerCase()))
+          .where(
+            (p) =>
+                p.title.toLowerCase().contains(query.toLowerCase()) ||
+                p.description.toLowerCase().contains(query.toLowerCase()),
+          )
           .toList();
     }
 

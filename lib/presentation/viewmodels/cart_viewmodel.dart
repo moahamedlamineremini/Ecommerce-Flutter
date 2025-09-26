@@ -60,7 +60,10 @@ class CartViewModel {
   void placeOrder() {
     final items = List<CartItem>.from(cartItems.value);
     if (items.isEmpty) return;
-    double totalPrice = items.fold(0, (sum, item) => sum + item.quantity * item.product.price);
+    double totalPrice = items.fold(
+      0,
+      (sum, item) => sum + item.quantity * item.product.price,
+    );
     orderHistory.value = List.from(orderHistory.value)
       ..add(Order(items: items, totalPrice: totalPrice, date: DateTime.now()));
     cartItems.value = [];

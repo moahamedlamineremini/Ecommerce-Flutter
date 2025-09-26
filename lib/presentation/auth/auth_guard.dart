@@ -1,5 +1,4 @@
 import 'package:go_router/go_router.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 import '../catalog/catalog_page.dart';
@@ -26,7 +25,9 @@ class GoRouterRefreshStream extends ChangeNotifier {
 GoRouter createRouter() {
   return GoRouter(
     initialLocation: '/login',
-    refreshListenable: GoRouterRefreshStream(FirebaseAuth.instance.authStateChanges()),
+    refreshListenable: GoRouterRefreshStream(
+      FirebaseAuth.instance.authStateChanges(),
+    ),
     routes: [
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
       GoRoute(path: '/catalog', builder: (_, __) => const CatalogPage()),

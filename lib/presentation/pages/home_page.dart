@@ -40,24 +40,24 @@ class AppDrawer extends ConsumerWidget {
                 Text('Menu', style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 if (user != null)
-                  Text('Connecté : ${user.email}', style: const TextStyle(color: Colors.green))
+                  Text(
+                    'Connecté : ${user.email}',
+                    style: const TextStyle(color: Colors.green),
+                  )
                 else
-                  Text('Non connecté', style: const TextStyle(color: Colors.red)),
+                  Text(
+                    'Non connecté',
+                    style: const TextStyle(color: Colors.red),
+                  ),
               ],
             ),
           ),
-          ListTile(
-            title: Text('Accueil'),
-            onTap: () => context.go('/'),
-          ),
+          ListTile(title: Text('Accueil'), onTap: () => context.go('/')),
           ListTile(
             title: Text('Produits'),
             onTap: () => context.go('/products'),
           ),
-          ListTile(
-            title: Text('Panier'),
-            onTap: () => context.go('/cart'),
-          ),
+          ListTile(title: Text('Panier'), onTap: () => context.go('/cart')),
           ListTile(
             title: Text('Historique des commandes'),
             onTap: () => context.go('/order-history'),
@@ -73,8 +73,9 @@ class AppDrawer extends ConsumerWidget {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () async {
+                  final navigator = GoRouter.of(context);
                   await ref.read(authViewModelProvider.notifier).signOut();
-                  context.go('/login');
+                  navigator.go('/login');
                 },
               ),
             ),

@@ -18,7 +18,7 @@ void main() {
         thumbnail: 'thumb.png',
         images: ['img1.png'],
         description: '',
-        category: ''
+        category: '',
       );
       cart.addToCart(product, quantity: 2);
       expect(cart.cartItems.value.length, 1);
@@ -35,7 +35,7 @@ void main() {
         thumbnail: 'thumb2.png',
         images: ['img2.png'],
         description: '',
-        category: ''
+        category: '',
       );
       cart.addToCart(product);
       cart.removeFromCart(2);
@@ -53,10 +53,16 @@ void main() {
         thumbnail: 'thumb3.png',
         images: ['img3.png'],
         description: '',
-        category: ''
+        category: '',
       );
       cart.addToCart(product);
-      cart.orderHistory.value.add(Order(items: cart.cartItems.value, totalPrice: 30.0, date: DateTime.now()));
+      cart.orderHistory.value.add(
+        Order(
+          items: cart.cartItems.value,
+          totalPrice: 30.0,
+          date: DateTime.now(),
+        ),
+      );
       expect(cart.orderHistory.value.length, 1);
       expect(cart.orderHistory.value.first.totalPrice, 30.0);
     });

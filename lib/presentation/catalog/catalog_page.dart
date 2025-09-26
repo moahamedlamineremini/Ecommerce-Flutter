@@ -22,9 +22,7 @@ class CatalogPage extends ConsumerWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('Catalog'),
-      ),
+      body: const Center(child: Text('Catalog')),
     );
   }
 }

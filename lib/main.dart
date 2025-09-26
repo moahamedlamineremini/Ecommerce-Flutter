@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'presentation/auth/login_page.dart';
 import 'presentation/catalog/catalog_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'presentation/auth/auth_guard.dart'; // redirect logic (étape 7)
 import 'package:ecommerce_app/presentation/pages/home_page.dart';
 import 'package:ecommerce_app/presentation/pages/products_page.dart';
 import 'package:ecommerce_app/presentation/pages/product_page.dart';
@@ -15,9 +14,7 @@ import 'presentation/auth/auth_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -29,9 +26,7 @@ class MyApp extends StatelessWidget {
     final router = createRouter();
     return MaterialApp.router(
       title: 'Shop Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       routerConfig: router,
     );
   }
@@ -41,14 +36,8 @@ GoRouter createRouter() {
   return GoRouter(
     initialLocation: '/',
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const HomePage(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginPage(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const HomePage()),
+      GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
       GoRoute(
         path: '/catalog',
         builder: (context, state) => const CatalogPage(),
@@ -57,10 +46,7 @@ GoRouter createRouter() {
         path: '/products',
         builder: (context, state) => const ProductsPage(),
       ),
-      GoRoute(
-        path: '/cart',
-        builder: (context, state) => const CartPage(),
-      ),
+      GoRoute(path: '/cart', builder: (context, state) => const CartPage()),
       GoRoute(
         path: '/order-history',
         builder: (context, state) => const OrderHistoryPage(),

@@ -26,7 +26,10 @@ class CartPage extends ConsumerWidget {
         valueListenable: viewModel.cartItems,
         builder: (context, items, _) {
           int total = items.fold(0, (sum, item) => sum + item.quantity);
-          double totalPrice = items.fold(0, (sum, item) => sum + item.quantity * item.product.price);
+          double totalPrice = items.fold(
+            0,
+            (sum, item) => sum + item.quantity * item.product.price,
+          );
           if (items.isEmpty) {
             return const Center(child: Text('Votre panier est vide'));
           }
@@ -38,7 +41,10 @@ class CartPage extends ConsumerWidget {
                   children: [
                     const Icon(Icons.shopping_cart),
                     const SizedBox(width: 8),
-                    Text('Articles dans le panier : $total', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Text(
+                      'Articles dans le panier : $total',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ],
                 ),
               ),
@@ -49,14 +55,20 @@ class CartPage extends ConsumerWidget {
                     final item = items[index];
                     return ListTile(
                       leading: Image.network(
-                        item.product.images.isNotEmpty ? item.product.images.first : item.product.thumbnail,
-                        width: 50, height: 50),
+                        item.product.images.isNotEmpty
+                            ? item.product.images.first
+                            : item.product.thumbnail,
+                        width: 50,
+                        height: 50,
+                      ),
                       title: Text(item.product.title),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('Quantité: ${item.quantity}'),
-                          Text('Prix: ${(item.product.price * item.quantity).toStringAsFixed(2)} €'),
+                          Text(
+                            'Prix: ${(item.product.price * item.quantity).toStringAsFixed(2)} €',
+                          ),
                         ],
                       ),
                       trailing: Row(
@@ -64,16 +76,19 @@ class CartPage extends ConsumerWidget {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove),
-                            onPressed: () => viewModel.decrementQuantity(item.product.id),
+                            onPressed: () =>
+                                viewModel.decrementQuantity(item.product.id),
                           ),
                           Text('${item.quantity}'),
                           IconButton(
                             icon: const Icon(Icons.add),
-                            onPressed: () => viewModel.incrementQuantity(item.product.id),
+                            onPressed: () =>
+                                viewModel.incrementQuantity(item.product.id),
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete),
-                            onPressed: () => viewModel.removeFromCart(item.product.id),
+                            onPressed: () =>
+                                viewModel.removeFromCart(item.product.id),
                           ),
                         ],
                       ),
@@ -88,8 +103,20 @@ class CartPage extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Prix total :', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text('${totalPrice.toStringAsFixed(2)} €', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text(
+                          'Prix total :',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${totalPrice.toStringAsFixed(2)} €',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -102,7 +129,9 @@ class CartPage extends ConsumerWidget {
                             // Redirige vers la page de connexion si non authentifié
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const LoginPage()),
+                              MaterialPageRoute(
+                                builder: (context) => const LoginPage(),
+                              ),
                             );
                             return;
                           }
@@ -111,13 +140,17 @@ class CartPage extends ConsumerWidget {
                             context: context,
                             builder: (context) => AlertDialog(
                               title: const Text('Paiement Stripe'),
-                              content: const Text('Paiement réussi ! (test Stripe)\nVotre commande a été enregistrée.'),
+                              content: const Text(
+                                'Paiement réussi ! (test Stripe)\nVotre commande a été enregistrée.',
+                              ),
                               actions: [
                                 TextButton(
                                   child: const Text('Voir l\'historique'),
                                   onPressed: () {
                                     Navigator.pop(context); // ferme le dialog
-                                    context.go('/order-history'); // navigation GoRouter
+                                    context.go(
+                                      '/order-history',
+                                    ); // navigation GoRouter
                                   },
                                 ),
                                 TextButton(

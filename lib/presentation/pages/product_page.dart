@@ -11,15 +11,16 @@ import 'package:go_router/go_router.dart';
 class ProductPage extends StatefulWidget {
   final int productId;
   final CatalogRepository? repository;
+
   /// callback optionnel; l'intégration réelle au panier sera faite par Personne A
   final void Function(Product)? onAddToCart;
 
   const ProductPage({
-    Key? key,
+    super.key,
     required this.productId,
     this.repository,
     this.onAddToCart,
-  }) : super(key: key);
+  });
 
   @override
   State<ProductPage> createState() => _ProductPageState();
@@ -30,7 +31,8 @@ class _ProductPageState extends State<ProductPage> {
   int _quantity = 1;
 
   CatalogRepository _repoOrDefault() {
-    return widget.repository ?? CatalogRepositoryImpl(localJsonSource: LocalJsonSource());
+    return widget.repository ??
+        CatalogRepositoryImpl(localJsonSource: LocalJsonSource());
   }
 
   @override
@@ -75,20 +77,31 @@ class _ProductPageState extends State<ProductPage> {
               children: [
                 Center(
                   child: Image.network(
-                    product.images.isNotEmpty ? product.images.first : product.thumbnail,
+                    product.images.isNotEmpty
+                        ? product.images.first
+                        : product.thumbnail,
                     height: 200,
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(product.title, style: Theme.of(context).textTheme.titleLarge),
+                Text(
+                  product.title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
                 const SizedBox(height: 8),
                 Text(product.description),
                 const SizedBox(height: 16),
-                Text('Prix: ${product.price} €', style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'Prix: ${product.price} €',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Text('Quantité :', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Quantité :',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     IconButton(
                       icon: const Icon(Icons.remove),
                       onPressed: () {
@@ -115,12 +128,16 @@ class _ProductPageState extends State<ProductPage> {
                         final cartViewModel = CartViewModel();
                         cartViewModel.addToCart(product, quantity: _quantity);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('$_quantity produit(s) ajouté(s) au panier')),
+                          SnackBar(
+                            content: Text(
+                              '$_quantity produit(s) ajouté(s) au panier',
+                            ),
+                          ),
                         );
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Erreur: $e')),
-                        );
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
                       }
                     },
                   ),

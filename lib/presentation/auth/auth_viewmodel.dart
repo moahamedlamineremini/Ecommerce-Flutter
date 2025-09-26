@@ -4,8 +4,9 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 /// Provider accessible partout dans l'app.
 /// Contient l'état de l'utilisateur Firebase courant (User?).
-final authViewModelProvider =
-StateNotifierProvider<AuthViewModel, User?>((ref) => AuthViewModel());
+final authViewModelProvider = StateNotifierProvider<AuthViewModel, User?>(
+  (ref) => AuthViewModel(),
+);
 
 /// ViewModel pour gérer l'authentification (email/mdp + Google).
 class AuthViewModel extends StateNotifier<User?> {
@@ -33,7 +34,9 @@ class AuthViewModel extends StateNotifier<User?> {
   Future<String?> register(String email, String password) async {
     try {
       await _auth.createUserWithEmailAndPassword(
-          email: email, password: password);
+        email: email,
+        password: password,
+      );
       return null;
     } on FirebaseAuthException catch (e) {
       return _mapErrorToMessage(e);
@@ -67,7 +70,6 @@ class AuthViewModel extends StateNotifier<User?> {
       return e.toString();
     }
   }
-
 
   String _mapErrorToMessage(FirebaseAuthException e) {
     switch (e.code) {

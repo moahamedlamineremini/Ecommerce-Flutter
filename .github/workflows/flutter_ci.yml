@@ -1,0 +1,51 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Format check
+        run: dart format --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Check coverage (≥ 50%)
+        run: |
+          sudo apt-get install -y lcov
+          COVERAGE=$(lcov --summary coverage/lcov.info | grep lines | awk '{print $2}' | sed 's/%//')
+          if (( $(echo "$COVERAGE < 50" | bc -l) )); then
+            echo "Coverage is less than 50%"
+            exit 1
+          fi
+
+      - name: Build Web
+        run: flutter build web
+
+      - name: Upload Web artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-web
+          path: build/web
+
