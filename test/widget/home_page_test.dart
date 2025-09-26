@@ -21,24 +21,10 @@ class MockUser implements User {
 class MockAuthViewModel extends AuthViewModel {
   User? _user;
   bool signOutCalled = false;
-  late StateNotifierProviderRef<AuthViewModel, User?> _ref;
 
   MockAuthViewModel({User? user}) : _user = user;
 
-  void setUser(User? user) {
-    _user = user;
-  }
-
-  @override
   User? build() => _user;
-
-  // Ajouter le setter pour ref
-  void setRef(StateNotifierProviderRef<AuthViewModel, User?> ref) {
-    _ref = ref;
-  }
-
-  @override
-  StateNotifierProviderRef<AuthViewModel, User?> get ref => _ref;
 
   @override
   Future<void> signOut() async {
@@ -52,8 +38,8 @@ class MockAuthViewModel extends AuthViewModel {
 void main() {
   group('HomePage Tests', () {
     testWidgets('HomePage affiche correctement le titre et le bouton', (
-      WidgetTester tester,
-    ) async {
+        WidgetTester tester,
+        ) async {
       // Créer un router de test
       final router = GoRouter(
         routes: [
@@ -61,7 +47,7 @@ void main() {
           GoRoute(
             path: '/products',
             builder: (context, state) =>
-                const Scaffold(body: Text('Products Page')),
+            const Scaffold(body: Text('Products Page')),
           ),
         ],
       );
@@ -70,9 +56,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           authViewModelProvider.overrideWith((ref) {
-            final mock = MockAuthViewModel();
-            mock.setRef(ref);
-            return mock;
+            return MockAuthViewModel();
           }),
         ],
       );
@@ -102,8 +86,8 @@ void main() {
     });
 
     testWidgets('Cliquer sur le bouton navigue vers /products', (
-      WidgetTester tester,
-    ) async {
+        WidgetTester tester,
+        ) async {
       String? navigatedTo;
 
       final router = GoRouter(
@@ -122,9 +106,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           authViewModelProvider.overrideWith((ref) {
-            final mock = MockAuthViewModel();
-            mock.setRef(ref);
-            return mock;
+            return MockAuthViewModel();
           }),
         ],
       );
