@@ -38,8 +38,8 @@ class MockAuthViewModel extends AuthViewModel {
 void main() {
   group('HomePage Tests', () {
     testWidgets('HomePage affiche correctement le titre et le bouton', (
-        WidgetTester tester,
-        ) async {
+      WidgetTester tester,
+    ) async {
       // Créer un router de test
       final router = GoRouter(
         routes: [
@@ -47,7 +47,7 @@ void main() {
           GoRoute(
             path: '/products',
             builder: (context, state) =>
-            const Scaffold(body: Text('Products Page')),
+                const Scaffold(body: Text('Products Page')),
           ),
         ],
       );
@@ -86,8 +86,8 @@ void main() {
     });
 
     testWidgets('Cliquer sur le bouton navigue vers /products', (
-        WidgetTester tester,
-        ) async {
+      WidgetTester tester,
+    ) async {
       String? navigatedTo;
 
       final router = GoRouter(
