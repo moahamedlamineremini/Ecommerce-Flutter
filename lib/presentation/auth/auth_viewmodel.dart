@@ -10,10 +10,13 @@ final authViewModelProvider = StateNotifierProvider<AuthViewModel, User?>(
 
 /// ViewModel pour gérer l'authentification (email/mdp + Google).
 class AuthViewModel extends StateNotifier<User?> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth;
+  final GoogleSignIn _googleSignIn;
 
-  AuthViewModel() : super(FirebaseAuth.instance.currentUser) {
+  AuthViewModel({FirebaseAuth? auth, GoogleSignIn? googleSignIn})
+      : _auth = auth ?? FirebaseAuth.instance,
+        _googleSignIn = googleSignIn ?? GoogleSignIn(),
+        super((auth ?? FirebaseAuth.instance).currentUser) {
     // Écoute en temps réel les changements d'authentification
     _auth.authStateChanges().listen((user) => state = user);
   }
