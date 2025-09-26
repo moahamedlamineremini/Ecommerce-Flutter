@@ -7,8 +7,24 @@ class FakeLocalJsonSource extends LocalJsonSource {
   @override
   Future<List<ProductModel>> loadProducts() async {
     return [
-      ProductModel(id: 1, title: 'Test', description: 'desc', price: 10.0, thumbnail: '', images: [], category: 'cat'),
-      ProductModel(id: 2, title: 'Autre', description: 'autre desc', price: 20.0, thumbnail: '', images: [], category: 'autre'),
+      ProductModel(
+        id: 1,
+        title: 'Test',
+        description: 'desc',
+        price: 10.0,
+        thumbnail: '',
+        images: [],
+        category: 'cat',
+      ),
+      ProductModel(
+        id: 2,
+        title: 'Autre',
+        description: 'autre desc',
+        price: 20.0,
+        thumbnail: '',
+        images: [],
+        category: 'autre',
+      ),
     ];
   }
 }

@@ -31,20 +31,32 @@ class FakeFirebaseAuth implements FirebaseAuth {
   User? _currentUser;
 
   @override
-  Future<UserCredential> signInWithEmailAndPassword({required String email, required String password}) async {
+  Future<UserCredential> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
     signInCalled = true;
     if (shouldFailSignIn) {
-      throw FirebaseAuthException(code: 'wrong-password', message: 'Incorrect password');
+      throw FirebaseAuthException(
+        code: 'wrong-password',
+        message: 'Incorrect password',
+      );
     }
     _currentUser = FakeUser();
     return FakeUserCredential();
   }
 
   @override
-  Future<UserCredential> createUserWithEmailAndPassword({required String email, required String password}) async {
+  Future<UserCredential> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
     registerCalled = true;
     if (shouldFailRegister) {
-      throw FirebaseAuthException(code: 'weak-password', message: 'Password is too weak');
+      throw FirebaseAuthException(
+        code: 'weak-password',
+        message: 'Password is too weak',
+      );
     }
     _currentUser = FakeUser();
     return FakeUserCredential();
@@ -77,7 +89,8 @@ class FakeGoogleSignInAccount implements GoogleSignInAccount {
   String get displayName => 'Test User';
 
   @override
-  Future<GoogleSignInAuthentication> get authentication async => FakeGoogleSignInAuthentication();
+  Future<GoogleSignInAuthentication> get authentication async =>
+      FakeGoogleSignInAuthentication();
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

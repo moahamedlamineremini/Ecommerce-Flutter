@@ -14,9 +14,9 @@ class AuthViewModel extends StateNotifier<User?> {
   final GoogleSignIn _googleSignIn;
 
   AuthViewModel({FirebaseAuth? auth, GoogleSignIn? googleSignIn})
-      : _auth = auth ?? FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn(),
-        super((auth ?? FirebaseAuth.instance).currentUser) {
+    : _auth = auth ?? FirebaseAuth.instance,
+      _googleSignIn = googleSignIn ?? GoogleSignIn(),
+      super((auth ?? FirebaseAuth.instance).currentUser) {
     // Écoute en temps réel les changements d'authentification
     _auth.authStateChanges().listen((user) => state = user);
   }

@@ -69,4 +69,3 @@ class CartViewModel {
     cartItems.value = [];
   }
 }
-

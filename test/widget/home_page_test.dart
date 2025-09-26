@@ -51,17 +51,17 @@ class MockAuthViewModel extends AuthViewModel {
 
 void main() {
   group('HomePage Tests', () {
-    testWidgets('HomePage affiche correctement le titre et le bouton', (WidgetTester tester) async {
+    testWidgets('HomePage affiche correctement le titre et le bouton', (
+      WidgetTester tester,
+    ) async {
       // Créer un router de test
       final router = GoRouter(
         routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const HomePage(),
-          ),
+          GoRoute(path: '/', builder: (context, state) => const HomePage()),
           GoRoute(
             path: '/products',
-            builder: (context, state) => const Scaffold(body: Text('Products Page')),
+            builder: (context, state) =>
+                const Scaffold(body: Text('Products Page')),
           ),
         ],
       );
@@ -80,9 +80,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       );
 
@@ -103,15 +101,14 @@ void main() {
       // expect(find.byType(Drawer), findsOneWidget);
     });
 
-    testWidgets('Cliquer sur le bouton navigue vers /products', (WidgetTester tester) async {
+    testWidgets('Cliquer sur le bouton navigue vers /products', (
+      WidgetTester tester,
+    ) async {
       String? navigatedTo;
 
       final router = GoRouter(
         routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => const HomePage(),
-          ),
+          GoRoute(path: '/', builder: (context, state) => const HomePage()),
           GoRoute(
             path: '/products',
             builder: (context, state) {
@@ -135,9 +132,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp.router(
-            routerConfig: router,
-          ),
+          child: MaterialApp.router(routerConfig: router),
         ),
       );
 
