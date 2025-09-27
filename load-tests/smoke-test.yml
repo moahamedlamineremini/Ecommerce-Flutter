@@ -1,0 +1,33 @@
+# Test de fumée - Vérification basique des environnements
+config:
+  target: 'https://ecommerce-55dd8-4d606.web.app'
+  phases:
+    - duration: 60
+      arrivalRate: 2
+      name: "Test de fumée - Vérification rapide"
+
+scenarios:
+  - name: "Page d'accueil"
+    weight: 70
+    flow:
+      - get:
+          url: "/"
+          headers:
+            User-Agent: "SmokeTest-LoadTesting"
+          expect:
+            - statusCode: [200, 301, 302]
+      - think: 3
+
+  - name: "Navigation simple"
+    weight: 30
+    flow:
+      - get:
+          url: "/"
+          expect:
+            - statusCode: [200, 301, 302]
+      - think: 2
+      - get:
+          url: "/#/"
+          expect:
+            - statusCode: [200, 301, 302]
+      - think: 1

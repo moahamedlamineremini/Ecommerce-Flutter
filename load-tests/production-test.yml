@@ -1,0 +1,31 @@
+# Test spécifique - Environnement de PRODUCTION
+config:
+  target: 'https://ecommerce-55dd8-4d606.web.app'
+  phases:
+    - duration: 180
+      arrivalRate: 15
+      name: "Test Production - Charge normale"
+    - duration: 120
+      arrivalRate: 30
+      name: "Test Production - Pic de trafic"
+
+scenarios:
+  - name: "Utilisateur e-commerce production"
+    flow:
+      - get:
+          url: "/"
+          headers:
+            User-Agent: "LoadTest-Production"
+          expect:
+            - statusCode: 200
+      - think: 3
+      - get:
+          url: "/products"
+      - think: 5
+      - get:
+          url: "/cart"
+      - think: 2
+
+metrics:
+  - name: "production_response_time"
+    value: "{{ response.time }}"

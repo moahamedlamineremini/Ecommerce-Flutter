@@ -1,0 +1,34 @@
+# Test spécifique - Canal BLUE (develop)
+config:
+  target: 'https://ecommerce-55dd8-4d606--blue-kwsqcu8f.web.app'
+  phases:
+    - duration: 120
+      arrivalRate: 10
+      name: "Test Blue Channel - Validation"
+    - duration: 180
+      arrivalRate: 20
+      name: "Test Blue Channel - Charge normale"
+
+scenarios:
+  - name: "Test fonctionnalités Blue"
+    flow:
+      - get:
+          url: "/"
+          headers:
+            User-Agent: "LoadTest-Blue-Channel"
+          expect:
+            - statusCode: [200, 301, 302]
+          capture:
+            - regex: "BLUE DEPLOYMENT"
+              as: "blueIndicator"
+      - think: 2
+      - get:
+          url: "/products"
+          expect:
+            - statusCode: [200, 301, 302]
+      - think: 4
+      - log: "Blue channel test - Response received"
+
+metrics:
+  - name: "blue_channel_response_time"
+    value: "{{ response.time }}"
