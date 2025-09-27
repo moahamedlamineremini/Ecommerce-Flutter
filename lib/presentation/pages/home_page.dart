@@ -10,14 +10,49 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Accueil'), actions: [const CartIcon()]),
+      appBar: AppBar(
+        title: const Text('Accueil'),
+        actions: [const CartIcon()],
+        backgroundColor: Colors.green.shade100, // Indicateur Green deployment
+      ),
       drawer: const AppDrawer(),
       body: Center(
-        child: ElevatedButton(
-          child: const Text('Voir tous les produits'),
-          onPressed: () {
-            context.go('/products');
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Indicateur visuel pour le test Blue-Green
+            Container(
+              padding: const EdgeInsets.all(8),
+              margin: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.shade50,
+                border: Border.all(color: Colors.green),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.circle, color: Colors.green, size: 12),
+                  SizedBox(width: 8),
+                  Text(
+                    'GREEN DEPLOYMENT - TEST',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              child: const Text('Voir tous les produits'),
+              onPressed: () {
+                context.go('/products');
+              },
+            ),
+          ],
         ),
       ),
     );

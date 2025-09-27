@@ -1,0 +1,366 @@
+name: Firebase Blue-Green Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+# Permissions nécessaires pour l'action Firebase Hosting Deploy
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  statuses: write
+
+env:
+  FLUTTER_VERSION: '3.35.4'  # Version Flutter qui contient Dart 3.9+
+  DART_VERSION: '3.9.0'      # Version Dart de référence
+  FIREBASE_PROJECT_ID: 'ecommerce-55dd8-4d606'
+
+jobs:
+  test:
+    name: Run Tests & Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
+
+      - name: Generate Firebase options
+        run: |
+          # Créer le fichier firebase_options.dart depuis l'exemple pour éviter les erreurs de compilation
+          cp lib/firebase_options_example.dart lib/firebase_options.dart
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Verify Dart version
+        run: dart --version
+
+      - name: Check Dart/Flutter configuration
+        run: |
+          flutter doctor -v
+          flutter --version
+
+      - name: Dart format check
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Flutter analyze
+        run: flutter analyze --fatal-infos
+
+      - name: Run Flutter tests with coverage
+        run: flutter test --coverage --test-randomize-ordering-seed random
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage/lcov.info
+          fail_ci_if_error: false
+
+  build:
+    name: Build Flutter Web App
+    runs-on: ubuntu-latest
+    needs: test
+    outputs:
+      build-success: ${{ steps.build-status.outputs.success }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
+
+      - name: Generate Firebase options
+        run: |
+          cp lib/firebase_options_example.dart lib/firebase_options.dart
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Flutter Web (Release)
+        run: flutter build web --release
+
+      - name: Verify build output
+        id: build-status
+        run: |
+          if [ -d "build/web" ] && [ -f "build/web/index.html" ] && [ -f "build/web/main.dart.js" ]; then
+            echo "✅ Build successful - all required files present"
+            echo "success=true" >> $GITHUB_OUTPUT
+            ls -la build/web/
+          else
+            echo "❌ Build failed - missing required files"
+            echo "success=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-web-build
+          path: build/web/
+          retention-days: 5
+
+  deploy-preview:
+    name: Deploy to Preview Channel (Blue/Green)
+    runs-on: ubuntu-latest
+    needs: build
+    if: (github.event_name == 'pull_request' || github.ref == 'refs/heads/develop') && needs.build.outputs.build-success == 'true'
+    outputs:
+      preview-url: ${{ steps.deploy.outputs.details_url }}
+      channel: ${{ steps.determine-channel.outputs.channel }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: flutter-web-build
+          path: build/web/
+
+      - name: Determine deployment channel
+        id: determine-channel
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "channel=blue" >> $GITHUB_OUTPUT
+            echo "🔵 Deploying to BLUE channel (develop branch)"
+          else
+            echo "channel=green" >> $GITHUB_OUTPUT
+            echo "🟢 Deploying to GREEN channel (pull request)"
+          fi
+
+      - name: Deploy to Firebase Hosting Preview Channel
+        id: deploy
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8_4D606 }}
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          channelId: ${{ steps.determine-channel.outputs.channel }}
+          expires: 30d
+
+      - name: Post deployment summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Channel**: ${{ steps.determine-channel.outputs.channel }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL**: ${{ steps.deploy.outputs.details_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Expires**: 30 days" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project**: ${{ env.FIREBASE_PROJECT_ID }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR with preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const channel = '${{ steps.determine-channel.outputs.channel }}';
+            const url = '${{ steps.deploy.outputs.details_url }}';
+            const emoji = channel === 'blue' ? '🔵' : '🟢';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${emoji} **Preview deployed** (Channel: \`${channel}\`)\n\n🌍 **URL**: ${url}\n\n✨ Test your changes before merging!\n\n---\n*Deployment expires in 30 days*`
+            });
+
+  deploy-production:
+    name: Deploy to Production (Live)
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.build-success == 'true'
+    environment:
+      name: production
+      url: https://${{ env.FIREBASE_PROJECT_ID }}.web.app
+    outputs:
+      production-url: https://${{ env.FIREBASE_PROJECT_ID }}.web.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: flutter-web-build
+          path: build/web/
+
+      - name: Deploy to Firebase Hosting Production
+        id: deploy-prod
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8_4D606 }}
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          channelId: live
+
+      - name: Post production deployment summary
+        run: |
+          echo "## 🎉 Production Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "- **Live URL**: https://${{ env.FIREBASE_PROJECT_ID }}.web.app" >> $GITHUB_STEP_SUMMARY
+          echo "- **Firebase Console**: https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting" >> $GITHUB_STEP_SUMMARY
+
+  smoke-tests:
+    name: Run Smoke Tests (Production)
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          npm init -y
+          npm install @playwright/test
+          npx playwright install chromium
+
+      - name: Run smoke tests
+        run: |
+          cat > smoke-tests.js << 'EOF'
+          const { test, expect } = require('@playwright/test');
+          
+          test.describe('Production Smoke Tests', () => {
+            test('App loads successfully', async ({ page }) => {
+              console.log('Testing production URL...');
+              await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
+              
+              // Attendre que Flutter se charge
+              await page.waitForSelector('flt-glass-pane', { timeout: 30000 });
+              
+              // Vérifier que l'app n'a pas d'erreurs critiques
+              const errors = [];
+              page.on('pageerror', error => {
+                if (!error.message.includes('Non-Error promise rejection')) {
+                  errors.push(error.message);
+                }
+              });
+              
+              await page.waitForLoadState('networkidle', { timeout: 10000 });
+              
+              // Vérifier le titre de la page
+              const title = await page.title();
+              expect(title).toBeTruthy();
+              
+              // Vérifier qu'il n'y a pas d'erreurs critiques
+              expect(errors).toHaveLength(0);
+              
+              console.log('✅ App loads successfully');
+            });
+            
+            test('Navigation elements are present', async ({ page }) => {
+              await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
+              await page.waitForSelector('flt-glass-pane', { timeout: 30000 });
+              
+              // Vérifier la présence d'éléments de navigation Flutter
+              const flutterApp = await page.locator('flt-glass-pane').count();
+              expect(flutterApp).toBeGreaterThan(0);
+              
+              console.log('✅ Flutter app structure is present');
+            });
+          });
+          EOF
+          
+          npx playwright test smoke-tests.js --reporter=line
+
+      - name: Upload smoke test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-test-results
+          path: test-results/
+
+      - name: Notify deployment success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `🎉 **Production deployment successful!**\n\n🌍 **Live URL**: https://${{ env.FIREBASE_PROJECT_ID }}.web.app\n\n✅ All smoke tests passed\n\n🔧 **Firebase Console**: https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting`
+            });
+
+  promote-channel:
+    name: Promote Channel to Live (Manual)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment:
+      name: promotion
+      url: https://${{ env.FIREBASE_PROJECT_ID }}.web.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Authenticate with Firebase
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8_4D606 }}
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8_4D606 }}' > $HOME/firebase-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/firebase-key.json
+
+      - name: List available channels
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8_4D606 }}' > ${{ runner.temp }}/firebase-key.json
+          firebase hosting:channel:list --project ${{ env.FIREBASE_PROJECT_ID }}
+
+      - name: Promote channel (Interactive)
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-key.json
+        run: |
+          echo "🔄 Manual promotion workflow triggered"
+          echo "Available commands:"
+          echo "  firebase hosting:clone ${{ env.FIREBASE_PROJECT_ID }}:blue ${{ env.FIREBASE_PROJECT_ID }}:live"
+          echo "  firebase hosting:clone ${{ env.FIREBASE_PROJECT_ID }}:green ${{ env.FIREBASE_PROJECT_ID }}:live"
+          echo ""
+          echo "Use the Firebase Console for manual promotion:"
+          echo "https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting"
+
+  status-check:
+    name: Deployment Status Check
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [test, build, deploy-preview, deploy-production]
+    steps:
+      - name: Generate deployment status report
+        run: |
+          echo "## 📊 Deployment Status Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests & Analysis | ${{ needs.test.result }} | Dart format, Flutter analyze, tests |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | ${{ needs.build.result }} | Flutter Web build |" >> $GITHUB_STEP_SUMMARY
+          echo "| Preview Deploy | ${{ needs.deploy-preview.result }} | Blue/Green channels |" >> $GITHUB_STEP_SUMMARY
+          echo "| Production Deploy | ${{ needs.deploy-production.result }} | Live channel |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Quick Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [Firebase Console](https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Production Site](https://${{ env.FIREBASE_PROJECT_ID }}.web.app)" >> $GITHUB_STEP_SUMMARY
