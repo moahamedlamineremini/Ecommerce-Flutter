@@ -10,8 +10,8 @@ on:
       - main
 
 env:
-  FLUTTER_VERSION: '3.27.0'  # Version Flutter qui contient Dart 3.9+
-  DART_VERSION: '3.6.0'      # Version Dart de référence
+  FLUTTER_VERSION: '3.35.4'  # Version Flutter qui contient Dart 3.9+
+  DART_VERSION: '3.9.0'      # Version Dart de référence
   FIREBASE_PROJECT_ID: 'ecommerce-55dd8-4d606'
 
 jobs:
