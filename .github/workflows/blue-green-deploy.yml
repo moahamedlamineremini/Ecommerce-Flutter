@@ -174,7 +174,7 @@ jobs:
             const channel = '${{ steps.determine-channel.outputs.channel }}';
             const url = '${{ steps.deploy.outputs.details_url }}';
             const emoji = channel === 'blue' ? '🔵' : '🟢';
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -286,19 +286,8 @@ jobs:
           
           echo "🔥 Lancement du test de charge sur la production"
           artillery run production-smoke-test.yml
-          echo "✅ Test de charge production terminé"
-
-      - name: Notify deployment success
-        if: success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: `🎉 **Production deployment successful!**\n\n🌍 **Live URL**: https://${{ env.FIREBASE_PROJECT_ID }}.web.app\n\n✅ Load tests passed\n\n🔧 **Firebase Console**: https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting`
-            })
+          echo "✅ Test de charge production terminé avec succès"
+          echo "🌍 Production URL: https://${{ env.FIREBASE_PROJECT_ID }}.web.app"
 
   promote-channel:
     name: Promote Channel to Live (Manual)
