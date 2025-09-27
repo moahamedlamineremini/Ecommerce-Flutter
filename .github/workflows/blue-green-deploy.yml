@@ -53,9 +53,6 @@ jobs:
       - name: Flutter analyze
         run: flutter analyze --fatal-infos
 
-      - name: Run Dart tests
-        run: dart test --coverage=coverage
-
       - name: Run Flutter tests with coverage
         run: flutter test --coverage --test-randomize-ordering-seed random
 
