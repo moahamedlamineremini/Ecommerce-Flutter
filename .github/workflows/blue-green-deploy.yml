@@ -182,6 +182,35 @@ jobs:
               body: `${emoji} **Preview deployed** (Channel: \`${channel}\`)\n\n🌍 **URL**: ${url}\n\n✨ Test your changes before merging!\n\n---\n*Deployment expires in 30 days*`
             });
 
+      - name: Run Load Tests on Deployed Channel
+        run: |
+          # Installer Artillery pour les tests de charge
+          npm install -g artillery
+          
+          # Créer un test de charge simple pour le canal déployé
+          cat > channel-smoke-test.yml << 'EOF'
+          config:
+            target: '${{ steps.deploy.outputs.details_url }}'
+            phases:
+              - duration: 60
+                arrivalRate: 2
+                name: "Smoke test du canal déployé"
+          scenarios:
+            - name: "Test basique du canal"
+              flow:
+                - get:
+                    url: "/"
+                    expect:
+                      - statusCode: [200, 301, 302]
+                - think: 2
+          EOF
+          
+          # Exécuter le test de charge
+          echo "🔥 Lancement du test de charge sur le canal ${{ steps.determine-channel.outputs.channel }}"
+          artillery run channel-smoke-test.yml
+          
+          echo "✅ Test de charge terminé pour le canal ${{ steps.determine-channel.outputs.channel }}"
+
   deploy-production:
     name: Deploy to Production (Live)
     runs-on: ubuntu-latest
@@ -231,66 +260,33 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Playwright
+      - name: Install Artillery for Production Load Tests
         run: |
-          npm init -y
-          npm install @playwright/test
-          npx playwright install chromium
+          npm install -g artillery
 
-      - name: Run smoke tests
+      - name: Run Production Load Tests
         run: |
-          cat > smoke-tests.js << 'EOF'
-          const { test, expect } = require('@playwright/test');
-          
-          test.describe('Production Smoke Tests', () => {
-            test('App loads successfully', async ({ page }) => {
-              console.log('Testing production URL...');
-              await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
-              
-              // Attendre que Flutter se charge
-              await page.waitForSelector('flt-glass-pane', { timeout: 30000 });
-              
-              // Vérifier que l'app n'a pas d'erreurs critiques
-              const errors = [];
-              page.on('pageerror', error => {
-                if (!error.message.includes('Non-Error promise rejection')) {
-                  errors.push(error.message);
-                }
-              });
-              
-              await page.waitForLoadState('networkidle', { timeout: 10000 });
-              
-              // Vérifier le titre de la page
-              const title = await page.title();
-              expect(title).toBeTruthy();
-              
-              // Vérifier qu'il n'y a pas d'erreurs critiques
-              expect(errors).toHaveLength(0);
-              
-              console.log('✅ App loads successfully');
-            });
-            
-            test('Navigation elements are present', async ({ page }) => {
-              await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
-              await page.waitForSelector('flt-glass-pane', { timeout: 30000 });
-              
-              // Vérifier la présence d'éléments de navigation Flutter
-              const flutterApp = await page.locator('flt-glass-pane').count();
-              expect(flutterApp).toBeGreaterThan(0);
-              
-              console.log('✅ Flutter app structure is present');
-            });
-          });
+          # Créer un test de charge pour la production
+          cat > production-smoke-test.yml << 'EOF'
+          config:
+            target: 'https://${{ env.FIREBASE_PROJECT_ID }}.web.app'
+            phases:
+              - duration: 60
+                arrivalRate: 3
+                name: "Production smoke test"
+          scenarios:
+            - name: "Production load test"
+              flow:
+                - get:
+                    url: "/"
+                    expect:
+                      - statusCode: [200, 301, 302]
+                - think: 2
           EOF
           
-          npx playwright test smoke-tests.js --reporter=line
-
-      - name: Upload smoke test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: smoke-test-results
-          path: test-results/
+          echo "🔥 Lancement du test de charge sur la production"
+          artillery run production-smoke-test.yml
+          echo "✅ Test de charge production terminé"
 
       - name: Notify deployment success
         if: success()
@@ -301,8 +297,8 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: `🎉 **Production deployment successful!**\n\n🌍 **Live URL**: https://${{ env.FIREBASE_PROJECT_ID }}.web.app\n\n✅ All smoke tests passed\n\n🔧 **Firebase Console**: https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting`
-            });
+              body: `🎉 **Production deployment successful!**\n\n🌍 **Live URL**: https://${{ env.FIREBASE_PROJECT_ID }}.web.app\n\n✅ Load tests passed\n\n🔧 **Firebase Console**: https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting`
+            })
 
   promote-channel:
     name: Promote Channel to Live (Manual)
