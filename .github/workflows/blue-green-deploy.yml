@@ -186,14 +186,14 @@ jobs:
           
           test('App loads successfully', async ({ page }) => {
             await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
-            
+          
             // Attendre le chargement de Flutter
             await page.waitForSelector('flt-glass-pane', { timeout: 30000 });
-            
+          
             // Vérifier que l'app charge sans erreurs critiques
             const errors = [];
             page.on('pageerror', error => errors.push(error.message));
-            
+          
             await page.waitForLoadState('networkidle');
             expect(errors.filter(e => !e.includes('Non-Error promise rejection'))).toHaveLength(0);
           });
@@ -201,7 +201,7 @@ jobs:
           test('Navigation works', async ({ page }) => {
             await page.goto('https://${{ env.FIREBASE_PROJECT_ID }}.web.app');
             await page.waitForSelector('flt-glass-pane', { timeout: 30000 });
-            
+          
             // Test de navigation basique Flutter
             const homeText = page.locator('flt-semantics').filter({ hasText: 'Accueil' }).first();
             if (await homeText.count() > 0) {
