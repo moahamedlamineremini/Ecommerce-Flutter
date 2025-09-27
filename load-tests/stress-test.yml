@@ -1,0 +1,47 @@
+# Test de stress - Pousser les limites du système
+config:
+  target: 'https://ecommerce-55dd8-4d606.web.app'
+  phases:
+    - duration: 120
+      arrivalRate: 10
+      rampTo: 50
+      name: "Montée en charge agressive"
+    - duration: 300
+      arrivalRate: 50
+      name: "Stress soutenu - 50 utilisateurs/s"
+    - duration: 180
+      arrivalRate: 50
+      rampTo: 100
+      name: "Pic de stress - jusqu'à 100 utilisateurs/s"
+    - duration: 120
+      arrivalRate: 100
+      rampTo: 10
+      name: "Descente progressive"
+
+scenarios:
+  - name: "Charge intensive navigation"
+    weight: 70
+    flow:
+      - loop:
+        - get:
+            url: "/"
+        - think: 0.5
+        - get:
+            url: "/products"
+        - think: 1
+        - get:
+            url: "/cart"
+        - think: 0.5
+        count: 5
+
+  - name: "Requêtes rapides multiples"
+    weight: 30
+    flow:
+      - parallel:
+        - get:
+            url: "/"
+        - get:
+            url: "/products"
+        - get:
+            url: "/login"
+      - think: 2

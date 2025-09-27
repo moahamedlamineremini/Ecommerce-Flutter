@@ -1,0 +1,32 @@
+# Test spécifique - Canal GREEN (Pull Request)
+config:
+  target: 'https://ecommerce-55dd8-4d606--green-flohskqk.web.app'
+  phases:
+    - duration: 120
+      arrivalRate: 10
+      name: "Test Green Channel - Validation"
+    - duration: 180
+      arrivalRate: 20
+      name: "Test Green Channel - Charge normale"
+
+scenarios:
+  - name: "Test fonctionnalités Green"
+    flow:
+      - get:
+          url: "/"
+          headers:
+            User-Agent: "LoadTest-Green-Channel"
+          expect:
+            - statusCode: 200
+          capture:
+            - regex: "GREEN DEPLOYMENT"
+              as: "greenIndicator"
+      - think: 2
+      - get:
+          url: "/products"
+      - think: 4
+      - log: "Green channel test - Indicator found: {{ greenIndicator }}"
+
+metrics:
+  - name: "green_channel_response_time"
+    value: "{{ response.time }}"

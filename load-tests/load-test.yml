@@ -1,0 +1,54 @@
+# Test de charge normale - Simulation d'usage réel
+config:
+  target: 'https://ecommerce-55dd8-4d606.web.app'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: "Montée progressive"
+    - duration: 300
+      arrivalRate: 20
+      name: "Charge normale - 20 utilisateurs/s"
+    - duration: 60
+      arrivalRate: 5
+      name: "Descente progressive"
+
+scenarios:
+  - name: "Parcours utilisateur complet"
+    weight: 50
+    flow:
+      - get:
+          url: "/"
+          capture:
+            - json: "$.title"
+              as: "pageTitle"
+      - think: 3
+      - get:
+          url: "/products"
+      - think: 5
+      - get:
+          url: "/cart"
+      - think: 2
+
+  - name: "Navigation rapide"
+    weight: 40
+    flow:
+      - get:
+          url: "/"
+      - think: 1
+      - get:
+          url: "/products"
+      - think: 2
+      - get:
+          url: "/"
+
+  - name: "Test authentification"
+    weight: 10
+    flow:
+      - get:
+          url: "/login"
+      - think: 3
+      - post:
+          url: "/login"
+          json:
+            email: "test{{ $randomInt(1, 1000) }}@test.com"
+            password: "password123"

@@ -1,0 +1,20 @@
+{
+  "name": "ecommerce-load-tests",
+  "version": "1.0.0",
+  "description": "Tests de montée en charge pour l'application e-commerce",
+  "scripts": {
+    "test:smoke": "artillery run smoke-test.yml",
+    "test:load": "artillery run load-test.yml",
+    "test:stress": "artillery run stress-test.yml",
+    "test:all-environments": "npm run test:production && npm run test:blue && npm run test:green",
+    "test:production": "artillery run production-test.yml",
+    "test:blue": "artillery run blue-test.yml",
+    "test:green": "artillery run green-test.yml",
+    "install-artillery": "npm install -g artillery"
+  },
+  "devDependencies": {
+    "artillery": "^2.0.0"
+  },
+  "keywords": ["load-testing", "performance", "firebase", "flutter"]
+}
+
