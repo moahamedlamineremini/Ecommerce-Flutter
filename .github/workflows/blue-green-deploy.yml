@@ -10,7 +10,7 @@ on:
       - main
 
 env:
-  FLUTTER_VERSION: '3.27.0'  # Mise à jour vers une version compatible avec Dart 3.9.0
+  FLUTTER_VERSION: '3.35.4'  # Version Flutter compatible avec Dart SDK 3.9.0+
   FIREBASE_PROJECT_ID: 'ecommerce-55dd8-4d606'
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'  # Version mise à jour
+          flutter-version: '3.35.4'  # Version mise à jour pour Dart 3.9.0+
           cache: true  # Activé pour améliorer les performances
 
       - name: Disable Flutter analytics
@@ -56,7 +56,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'  # Version mise à jour
+          flutter-version: '3.35.4'  # Version mise à jour pour Dart 3.9.0+
           cache: true
 
       - name: Disable Flutter analytics
@@ -90,7 +90,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'  # Version mise à jour
+          flutter-version: '3.35.4'  # Version mise à jour pour Dart 3.9.0+
           cache: true
 
       - name: Download build artifacts
@@ -147,7 +147,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'  # Version mise à jour
+          flutter-version: '3.35.4'  # Version mise à jour pour Dart 3.9.0+
           cache: true
 
       - name: Disable Flutter analytics
