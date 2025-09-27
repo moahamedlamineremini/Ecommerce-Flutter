@@ -9,6 +9,13 @@ on:
     branches:
       - main
 
+# Permissions nécessaires pour l'action Firebase Hosting Deploy
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+  statuses: write
+
 env:
   FLUTTER_VERSION: '3.35.4'  # Version Flutter qui contient Dart 3.9+
   DART_VERSION: '3.9.0'      # Version Dart de référence
