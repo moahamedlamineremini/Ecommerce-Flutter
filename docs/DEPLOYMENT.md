@@ -1,251 +1,324 @@
-# Guide de Déploiement Blue-Green sur Firebase Hosting
+# Guide de Déploiement Blue-Green sur Vercel
 
 ## Vue d'ensemble
 
-Le déploiement Blue-Green permet de déployer en toute sécurité une nouvelle version de l'application en utilisant deux environnements distincts (Blue et Green). Cette stratégie minimise les temps d'arrêt et permet un rollback instantané.
+Le déploiement Blue-Green sur Vercel utilise les **Preview Deployments** (Blue) et **Production Deployments** (Green) pour permettre des déploiements sûrs avec possibilité de rollback instantané.
 
-## Architecture
+## Architecture Vercel
 
 ```
-Production (Live) ←→ Blue Channel
-                 ←→ Green Channel
+Production (Green) ←→ Custom Domain
+Preview (Blue)     ←→ Generated Preview URLs
 ```
 
-### Avantages
-- **Zero downtime** : Passage instantané entre les versions
-- **Rollback rapide** : Retour immédiat à la version précédente
-- **Testing sécurisé** : Test complet avant mise en production
-- **Isolation** : Séparation complète des environnements
+### Avantages Vercel
+- **Preview URLs automatiques** : Chaque commit/PR génère une URL unique
+- **Zero downtime** : Basculement instantané via DNS
+- **Rollback en 1-click** : Via dashboard ou CLI
+- **Edge Network** : Performance mondiale optimisée
+- **Analytics intégrés** : Monitoring en temps réel
 
 ## Configuration Initiale
 
 ### 1. Prérequis
 
 ```bash
-# Installer Flutter (si pas déjà fait)
-# Télécharger depuis https://flutter.dev
+# Installer Node.js et npm
+# https://nodejs.org
 
-# Installer Firebase CLI
-npm install -g firebase-tools
+# Installer Vercel CLI
+npm install -g vercel
 
-# Se connecter à Firebase
-firebase login
+# Installer Flutter
+# https://flutter.dev
+
+# Se connecter à Vercel
+vercel login
 ```
 
-### 2. Configuration GitHub Secrets
-
-Dans votre repository GitHub, allez dans **Settings > Secrets and variables > Actions** et ajoutez :
-
-- `FIREBASE_SERVICE_ACCOUNT_ECOMMERCE_55DD8` : Clé de service Firebase (JSON)
-
-#### Génération de la clé de service :
-
-1. Allez dans [Firebase Console](https://console.firebase.google.com/)
-2. Sélectionnez votre projet `ecommerce-55dd8`
-3. **Project Settings > Service Accounts**
-4. **Generate new private key**
-5. Encodez le JSON en base64 : `base64 -i firebase-key.json`
-6. Copiez le résultat dans le secret GitHub
-
-### 3. Initialisation Firebase Hosting
+### 2. Configuration du Projet Vercel
 
 ```bash
 # Dans le répertoire du projet
-firebase init hosting
+vercel link
 
 # Suivre les instructions :
-# - Sélectionner le projet ecommerce-55dd8
-# - Public directory: build/web
-# - Configure as SPA: Yes
-# - Setup automatic builds: No
+# - Link to existing project? N
+# - Project name: ecommerce-flutter
+# - Directory: ./
 ```
+
+### 3. Configuration GitHub Secrets
+
+Dans **Settings > Secrets and variables > Actions** :
+
+- `VERCEL_TOKEN` : Token d'API Vercel
+- `VERCEL_ORG_ID` : ID de votre organisation
+- `VERCEL_PROJECT_ID` : ID du projet
+
+#### Génération des secrets :
+
+```bash
+# 1. Générer le token
+vercel token
+
+# 2. Récupérer les IDs
+cat .vercel/project.json
+# Copiez "orgId" et "projectId"
+```
+
+### 4. Configuration Automatique
+
+Le fichier `vercel.json` est déjà configuré avec :
+- Build command Flutter optimisé
+- Rewrites pour SPA
+- Headers de cache performants
+- Variables d'environnement
 
 ## Utilisation
 
 ### Méthode 1 : GitHub Actions (Automatique)
 
-#### Push sur `main` (Production)
+#### Pull Request (Blue Environment)
 ```bash
+git checkout -b feature/nouvelle-fonctionnalité
 git add .
 git commit -m "feat: nouvelle fonctionnalité"
+git push origin feature/nouvelle-fonctionnalité
+# Créer la PR sur GitHub
+```
+
+**Résultat :**
+- ✅ Tests automatiques
+- 🚀 Déploiement Preview automatique
+- 💬 Commentaire PR avec URL preview
+- 🔵 Environment Blue actif
+
+#### Push sur Main (Green Environment)
+```bash
+git checkout main
+git merge feature/nouvelle-fonctionnalité
 git push origin main
 ```
 
 **Workflow automatique :**
 1. 🧪 Tests et analyse
-2. 🏗️ Build de l'application
-3. 🚀 Déploiement sur canal `green`
-4. 🔍 Tests de fumée automatiques
-5. ✅ Promotion automatique vers production (si tests OK)
-
-#### Push sur `develop` (Staging)
-```bash
-git push origin develop
-```
-- Déploie automatiquement sur le canal `blue`
-- Idéal pour les tests de staging
+2. 🏗️ Build optimisé
+3. 🚀 Déploiement Production
+4. 🔍 Tests de fumée
+5. ✅ Notification de succès
 
 ### Méthode 2 : Scripts Locaux
 
 #### Windows (PowerShell)
 ```powershell
-# Déployer sur Blue
-.\scripts\deploy.ps1 blue
+# Déployer en preview (Blue)
+.\scripts\deploy.ps1 preview
 
-# Déployer sur Green
-.\scripts\deploy.ps1 green
+# Déployer en production (Green)
+.\scripts\deploy.ps1 production
 
 # Voir le statut
 .\scripts\deploy.ps1 status
 
-# Promouvoir vers production
-.\scripts\deploy.ps1 promote
+# Rollback
+.\scripts\deploy.ps1 rollback
 ```
 
-#### Linux/Mac (Bash)
-```bash
-# Rendre le script exécutable
-chmod +x scripts/deploy.sh
-
-# Déployer sur Blue
-./scripts/deploy.sh blue
-
-# Déployer sur Green
-./scripts/deploy.sh green
-
-# Voir le statut
-./scripts/deploy.sh status
-
-# Promouvoir vers production
-./scripts/deploy.sh promote
-```
-
-### Méthode 3 : Firebase CLI Direct
+### Méthode 3 : Vercel CLI Direct
 
 ```bash
 # Construire l'app
 flutter build web --release
 
-# Déployer sur un canal
-firebase hosting:channel:deploy blue --expires 30d
+# Déployer en preview
+vercel deploy
 
-# Lister les canaux
-firebase hosting:channel:list
+# Déployer en production
+vercel deploy --prod
 
-# Promouvoir vers production
-firebase hosting:clone ecommerce-55dd8:blue ecommerce-55dd8:live
+# Lister les déploiements
+vercel ls
+
+# Rollback
+vercel rollback [URL]
 ```
 
 ## Workflow Blue-Green Recommandé
 
-### 1. Développement
+### 1. Développement Local
 ```bash
-# Branche develop pour les features
-git checkout develop
-git pull origin develop
+# Tester localement
+flutter run -d chrome
 
-# Développer la fonctionnalité
-# ...
-
-git add .
-git commit -m "feat: nouvelle fonctionnalité"
-git push origin develop
+# Vérifier les tests
+flutter test --coverage
+flutter analyze
 ```
-→ **Déploie automatiquement sur canal `blue`**
 
-### 2. Staging et Tests
-- L'application est déployée sur `https://ecommerce-55dd8--blue-xyz.web.app`
-- Tests manuels et automatiques
-- Validation des fonctionnalités
+### 2. Preview Deployment (Blue)
+```bash
+# Créer une PR ou push sur develop
+git push origin feature/ma-feature
+```
+→ **URL Preview générée automatiquement**
 
-### 3. Production
+### 3. Tests et Validation
+- Tester sur l'URL preview
+- Valider les fonctionnalités
+- Reviews de code via PR
+
+### 4. Production Deployment (Green)
 ```bash
 # Merger vers main
 git checkout main
-git merge develop
+git merge feature/ma-feature
 git push origin main
 ```
-→ **Déploie sur canal `green` puis promeut vers production**
+→ **Déploiement production automatique**
 
-### 4. Rollback (si nécessaire)
+### 5. Monitoring Post-Déploiement
+- Vérifier les métriques Vercel
+- Monitorer les erreurs
+- Valider les performances
+
+## URLs et Environnements
+
+### Structure des URLs
+- **Production** : `https://votre-domain.vercel.app`
+- **Preview** : `https://ecommerce-flutter-[hash]-[team].vercel.app`
+- **Branch** : `https://ecommerce-flutter-git-[branch]-[team].vercel.app`
+
+### Domaines Personnalisés
 ```bash
-# Via GitHub Actions (manual workflow)
-# Ou via script local
-./scripts/deploy.sh promote
-# Sélectionner le canal précédent
+# Ajouter un domaine
+vercel domains add votre-domain.com
+
+# Configurer via dashboard Vercel
+# Settings > Domains > Add Domain
 ```
 
-## Monitoring et URLs
+## Tests Automatisés
 
-### URLs d'Environnement
-- **Production** : `https://ecommerce-55dd8.web.app`
-- **Blue Channel** : `https://ecommerce-55dd8--blue-xyz.web.app`
-- **Green Channel** : `https://ecommerce-55dd8--green-xyz.web.app`
-
-### Monitoring
-- **Firebase Console** : https://console.firebase.google.com/project/ecommerce-55dd8/hosting
-- **GitHub Actions** : Onglet Actions du repository
-- **Logs** : Firebase Console > Hosting > Usage
-
-## Tests de Fumée
-
+### Tests de Fumée Intégrés
 Les tests automatiques vérifient :
-- ✅ Chargement de l'application
-- ✅ Absence d'erreurs critiques
-- ✅ Navigation de base
-- ✅ Temps de réponse acceptable
+- ✅ Chargement Flutter complet
+- ✅ Absence d'erreurs JavaScript
+- ✅ Navigation fonctionnelle
+- ✅ Performance acceptable
 
-## Sécurité
+### Tests Locaux
+```bash
+# Tests Flutter
+flutter test
 
-### Bonnes Pratiques
-- Les canaux de prévisualisation expirent après 30 jours
-- Authentification requise pour les actions de production
-- Logs complets de tous les déploiements
-- Rollback facile via Firebase Console
+# Tests E2E avec Playwright (optionnel)
+npm install @playwright/test
+npx playwright test
+```
+
+## Monitoring et Analytics
+
+### Métriques Vercel
+- **Real User Monitoring** : Performance réelle
+- **Core Web Vitals** : Métriques de qualité
+- **Function Logs** : Debugging
+- **Bandwidth Usage** : Consommation
+
+### Dashboard
+- **Vercel Dashboard** : https://vercel.com/dashboard
+- **Analytics** : Métriques détaillées
+- **Deployments** : Historique complet
+
+## Sécurité et Performance
+
+### Optimisations Automatiques
+- **Edge Caching** : CDN mondial
+- **Image Optimization** : Compression automatique
+- **Compression** : Gzip/Brotli
+- **Tree Shaking** : Code mort éliminé
 
 ### Variables d'Environnement
-- `FIREBASE_PROJECT_ID` : ID du projet Firebase
-- `FLUTTER_VERSION` : Version Flutter utilisée
-- Secrets GitHub pour l'authentification
+```bash
+# Via CLI
+vercel env add FLUTTER_WEB
+
+# Via Dashboard
+# Settings > Environment Variables
+```
+
+### Sécurité
+- **HTTPS par défaut** : Certificats automatiques
+- **Headers de sécurité** : Configuration dans vercel.json
+- **Preview Protection** : Accès contrôlé aux previews
+
+## Rollback et Recovery
+
+### Rollback Automatique
+```bash
+# Via CLI
+vercel rollback https://deployment-url
+
+# Via Dashboard
+# Deployments > Previous deployment > Promote to Production
+```
+
+### Stratégies de Recovery
+1. **Rollback immédiat** : < 30 secondes
+2. **Hotfix deployment** : Correction rapide
+3. **Feature flag** : Désactivation sélective
 
 ## Dépannage
 
 ### Problèmes Courants
 
-#### 1. Échec de Build
+#### 1. Build Failures
 ```bash
-# Vérifier les dépendances
-flutter pub get
-flutter pub upgrade
-
-# Nettoyer et reconstruire
-flutter clean
-flutter build web --release
-```
-
-#### 2. Échec de Déploiement
-```bash
-# Vérifier l'authentification
-firebase login
-firebase projects:list
-
 # Vérifier la configuration
-firebase use ecommerce-55dd8
+cat vercel.json
+
+# Tester le build localement
+flutter build web --release
+
+# Vérifier les logs
+vercel logs
 ```
 
-#### 3. Tests de Fumée Échoués
-- Vérifier l'URL de déploiement
-- Valider les tests localement
-- Consulter les logs GitHub Actions
+#### 2. Routing Issues
+```bash
+# Vérifier les rewrites dans vercel.json
+# S'assurer que le SPA routing est configuré
+```
+
+#### 3. Performance Issues
+```bash
+# Analyser avec Vercel Analytics
+# Optimiser les assets
+flutter build web --web-renderer canvaskit
+```
 
 ### Support
-- **Firebase Support** : https://firebase.google.com/support
-- **Flutter Issues** : https://github.com/flutter/flutter/issues
-- **GitHub Actions** : https://docs.github.com/actions
+- **Vercel Docs** : https://vercel.com/docs
+- **Community** : https://github.com/vercel/vercel/discussions
+- **Status Page** : https://vercel-status.com
+
+## Coûts et Limites
+
+### Plan Gratuit (Hobby)
+- **Deployments** : Illimités
+- **Bandwidth** : 100GB/mois
+- **Builds** : 6000 minutes/mois
+- **Serverless Functions** : 12 par déploiement
+
+### Optimisation des Coûts
+- **Build Cache** : Réutilisation des builds
+- **Asset Optimization** : Compression automatique
+- **Edge Caching** : Réduction de la bande passante
 
 ## Métriques de Succès
 
-- ⚡ **Temps de déploiement** : < 5 minutes
-- 🎯 **Disponibilité** : > 99.9%
+- ⚡ **Temps de build** : < 3 minutes
+- 🌍 **Time to First Byte** : < 200ms
+- 🎯 **Uptime** : > 99.99%
 - 🔄 **Temps de rollback** : < 30 secondes
-- 🧪 **Couverture de tests** : > 80%
+- 📊 **Core Web Vitals** : Excellents scores
