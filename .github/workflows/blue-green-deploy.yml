@@ -10,7 +10,7 @@ on:
       - main
 
 env:
-  FLUTTER_VERSION: '3.24.0'
+  FLUTTER_VERSION: '3.27.0'  # Mise à jour vers une version compatible avec Dart 3.9.0
   FIREBASE_PROJECT_ID: 'ecommerce-55dd8-4d606'
 
 jobs:
@@ -24,8 +24,11 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          cache: false
+          flutter-version: '3.27.0'  # Version mise à jour
+          cache: true  # Activé pour améliorer les performances
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
 
       - name: Get dependencies
         run: flutter pub get
@@ -37,7 +40,7 @@ jobs:
         run: flutter test --coverage
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4  # Mise à jour vers v4
         with:
           files: coverage/lcov.info
           fail_ci_if_error: false
@@ -53,8 +56,11 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          cache: false
+          flutter-version: '3.27.0'  # Version mise à jour
+          cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
 
       - name: Get dependencies
         run: flutter pub get
@@ -63,7 +69,7 @@ jobs:
         run: flutter build web --release
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Mise à jour vers v4
         with:
           name: web-build
           path: build/web/
@@ -84,11 +90,11 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          cache: false
+          flutter-version: '3.27.0'  # Version mise à jour
+          cache: true
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4  # Mise à jour vers v4
         with:
           name: web-build
           path: build/web/
@@ -114,14 +120,14 @@ jobs:
 
       - name: Comment PR with preview URL
         if: github.event_name == 'pull_request'
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7  # Mise à jour vers v7
         with:
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🚀 **Preview deployed** (Channel: `${{ steps.determine-channel.outputs.channel }}`)\n\n🌐 **URL**: ${{ steps.deploy.outputs.details_url }}\n\n✨ Test your changes before merging!'
+              body: '🚀 **Preview deployed** (Channel: `${{ steps.determine-channel.outputs.channel }}`)\n\n🌍 **URL**: ${{ steps.deploy.outputs.details_url }}\n\n✨ Test your changes before merging!'
             })
 
   deploy-production:
@@ -141,11 +147,14 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          cache: false
+          flutter-version: '3.27.0'  # Version mise à jour
+          cache: true
+
+      - name: Disable Flutter analytics
+        run: flutter config --no-analytics
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4  # Mise à jour vers v4
         with:
           name: web-build
           path: build/web/
@@ -169,9 +178,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # Mise à jour vers v4
         with:
-          node-version: '18'
+          node-version: '20'  # Mise à jour vers Node 20
 
       - name: Install Playwright
         run: |
@@ -214,21 +223,21 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Mise à jour vers v4
         with:
           name: smoke-test-results
           path: test-results/
 
       - name: Notify success
         if: success()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7  # Mise à jour vers v7
         with:
           script: |
             github.rest.repos.createCommitComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: '🎉 **Production deployment successful!**\n\n🌐 **Live URL**: https://${{ env.FIREBASE_PROJECT_ID }}.web.app\n\n✅ All smoke tests passed'
+              body: '🎉 **Production deployment successful!**\n\n🌍 **Live URL**: https://${{ env.FIREBASE_PROJECT_ID }}.web.app\n\n✅ All smoke tests passed'
             })
 
   promote-channel:
@@ -276,7 +285,7 @@ jobs:
 
       - name: Rollback instructions
         run: |
-          echo "🔄 **Rollback available via Firebase Console:**"
+          echo "📄 **Rollback available via Firebase Console:**"
           echo "https://console.firebase.google.com/project/${{ env.FIREBASE_PROJECT_ID }}/hosting"
           echo ""
           echo "**Or use Firebase CLI:**"
